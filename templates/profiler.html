@@ -1,0 +1,379 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>FaceSense // 深度心理画像</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+        body { background: #050505; color: #a5f3fc; font-family: 'Share Tech Mono', monospace; overflow: hidden; cursor: crosshair; }
+
+        /* 边框发光特效 */
+        .sci-fi-border {
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            background: rgba(6, 182, 212, 0.02);
+            position: relative;
+            display: flex; flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        .sci-fi-border:hover {
+            border-color: rgba(6, 182, 212, 0.8);
+            box-shadow: 0 0 15px rgba(6, 182, 212, 0.1);
+        }
+        .sci-fi-border::before, .sci-fi-border::after { content: ''; position: absolute; width: 8px; height: 8px; border-color: #06b6d4; border-style: solid; transition: all 0.3s; pointer-events: none; }
+        .sci-fi-border::before { top: 0; left: 0; border-width: 2px 0 0 2px; }
+        .sci-fi-border::after { top: 0; right: 0; border-width: 2px 2px 0 0; }
+
+        .scan-line {
+            width: 100%; height: 2px; background: #06b6d4;
+            position: absolute; top: 0; opacity: 0.5; box-shadow: 0 0 10px #06b6d4;
+            animation: scan 3s linear infinite; pointer-events: none;
+        }
+        @keyframes scan { 0% { top: 0%; opacity: 0; } 50% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
+
+        .custom-scroll::-webkit-scrollbar { width: 4px; }
+        .custom-scroll::-webkit-scrollbar-track { background: rgba(6, 182, 212, 0.05); }
+        .custom-scroll::-webkit-scrollbar-thumb { background: #06b6d4; border-radius: 2px; }
+
+        /* 打字机光标 */
+        .typing-cursor::after { content: '▋'; animation: blink 1s infinite; margin-left: 2px; color: #06b6d4; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    </style>
+</head>
+<body class="p-6 h-screen flex flex-col gap-6">
+
+    <header class="flex justify-between items-center pb-4 border-b border-cyan-900 shrink-0">
+        <div class="flex items-center gap-4">
+            <i class="fa-solid fa-fingerprint text-4xl text-cyan-500 animate-pulse"></i>
+            <div>
+                <h1 class="text-3xl font-bold tracking-widest text-white">SUBJECT PROFILE</h1>
+                <p class="text-xs text-cyan-600 tracking-[0.5em]">DATABASE LINKED // LEVEL 5</p>
+            </div>
+        </div>
+        <button onclick="playClick(); window.location.href='/admin'" class="px-6 py-2 border border-cyan-800 text-cyan-500 hover:bg-cyan-900/30 transition text-xs tracking-widest cursor-pointer z-50 hover:text-white">RETURN_HOME</button>
+    </header>
+
+    <div class="flex-1 grid grid-cols-12 gap-6 min-h-0">
+
+        <!-- 左侧 -->
+        <div class="col-span-3 flex flex-col gap-4 min-h-0">
+            <div class="sci-fi-border p-4 z-50 shrink-0">
+                <h3 class="text-xs text-cyan-600 mb-2">DATABASE_SEARCH</h3>
+                <div class="flex gap-2 relative">
+                    <input type="text" id="search-input" placeholder="输入用户名..." class="w-full bg-black border border-cyan-900 text-cyan-100 px-2 py-1 text-sm focus:border-cyan-500 outline-none uppercase font-bold transition-colors focus:bg-cyan-900/10">
+                    <button id="btn-search" class="bg-cyan-600 px-4 text-white hover:bg-cyan-400 hover:text-black transition cursor-pointer font-bold transform active:scale-95">
+                        <i class="fa-solid fa-magnifying-glass"></i>
+                    </button>
+                </div>
+            </div>
+
+            <div class="sci-fi-border flex-1 p-6 relative flex flex-col items-center min-h-0 overflow-y-auto custom-scroll">
+                <div class="w-32 h-32 shrink-0 rounded-full border-2 border-dashed border-cyan-600 p-1 mb-4 relative group">
+                    <div class="w-full h-full rounded-full bg-cyan-900/20 flex items-center justify-center overflow-hidden group-hover:bg-cyan-900/40 transition">
+                        <i id="user-icon" class="fa-regular fa-circle-question text-5xl text-cyan-700 transition duration-500"></i>
+                    </div>
+                    <div class="absolute inset-0 rounded-full border-t-2 border-cyan-400 animate-spin" style="animation-duration: 3s"></div>
+                </div>
+                <h2 id="display-name" class="text-2xl text-white font-bold mb-1 scramble-text">WAITING...</h2>
+                <p id="display-id" class="text-xs text-gray-500 mb-6 scramble-text">NO_DATA</p>
+
+                <div class="w-full space-y-3 text-xs font-mono">
+                    <div class="flex justify-between border-b border-cyan-900 pb-1"><span>STATUS</span><span id="status-val" class="text-gray-600 scramble-text">OFFLINE</span></div>
+                    <div class="flex justify-between border-b border-cyan-900 pb-1"><span>REG_DATE</span><span id="reg-val" class="scramble-text">--</span></div>
+                    <div class="flex justify-between border-b border-cyan-900 pb-1"><span>TOTAL_LOGS</span><span id="logs-val" class="scramble-text">0</span></div>
+                    <div class="flex justify-between border-b border-cyan-900 pb-1"><span>RISK_FACTOR</span><span id="risk-val" class="text-gray-500 scramble-text">0%</span></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 中间 -->
+        <div class="col-span-6 flex flex-col gap-4 min-h-0">
+            <div class="sci-fi-border h-1/2 relative bg-black/50 overflow-hidden group shrink-0">
+                <!-- 3D 容器 -->
+                <div id="three-container" class="w-full h-full cursor-move"></div>
+                <div class="scan-line"></div>
+
+                <div class="absolute top-4 left-4 text-[10px] text-cyan-700 font-mono pointer-events-none">
+                    <p>MESH_VERTICES: 468</p>
+                    <p>TARGET: <span id="target-mesh" class="text-cyan-400">NULL</span></p>
+                </div>
+
+                <div class="absolute bottom-4 right-4 flex gap-2 z-40">
+                    <button id="btn-generate" disabled class="bg-gray-800 text-gray-500 px-6 py-2 font-bold text-sm cursor-not-allowed transition border border-gray-700 transform active:scale-95">
+                        <i class="fa-solid fa-lock mr-2"></i> LOCKED
+                    </button>
+                </div>
+            </div>
+
+            <div class="sci-fi-border flex-1 p-4 flex flex-col min-h-0">
+                <h3 class="text-xs text-cyan-600 mb-2 flex justify-between shrink-0"><span>PSYCHOLOGICAL_PROFILE_REPORT</span><i class="fa-solid fa-robot animate-pulse"></i></h3>
+                <div id="ai-report" class="flex-1 overflow-y-auto custom-scroll text-sm text-gray-300 leading-relaxed font-sans p-3 border border-white/5 bg-white/5 shadow-inner typing-cursor">
+                    <p class="text-gray-600 text-center mt-10 opacity-50">请输入用户名并搜索以解锁档案...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧 -->
+        <div class="col-span-3 flex flex-col gap-4 min-h-0">
+            <div class="sci-fi-border h-1/2 p-4">
+                <h3 class="text-xs text-cyan-600 mb-2">EMOTION_DISTRIBUTION</h3>
+                <div id="radar-chart" class="w-full h-full"></div>
+            </div>
+            <div class="sci-fi-border h-1/2 p-4 bg-cyan-900/10">
+                <h3 class="text-xs text-cyan-600 mb-2">DOMINANT_TRAIT</h3>
+                <div class="flex items-center justify-center h-full flex-col group">
+                    <div id="top-emo-icon" class="text-6xl mb-4 text-cyan-800 opacity-50 group-hover:scale-110 transition duration-300"><i class="fa-solid fa-ban"></i></div>
+                    <span id="top-emo-text" class="text-2xl font-bold text-cyan-500 scramble-text">--</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🚀 JS 逻辑 -->
+    <script>
+        let currentTarget = null;
+        let radarChart;
+        let sphereMesh; // 3D球体引用
+
+        // ==========================================
+        // 🔊 音效系统 (AudioContext 生成，无需文件)
+        // ==========================================
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+        function playTone(freq, type, duration) {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        function playClick() { playTone(800, 'square', 0.1); }
+        function playSuccess() { playTone(1200, 'sine', 0.1); setTimeout(() => playTone(1800, 'sine', 0.2), 100); }
+        function playError() { playTone(150, 'sawtooth', 0.3); }
+        function playTyping() { playTone(Math.random()*200 + 600, 'square', 0.05); }
+
+        // ==========================================
+        // 🔣 黑客文字解密特效 (Scramble Text)
+        // ==========================================
+        function scrambleElement(element, finalValue) {
+            const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789#@&%';
+            let iterations = 0;
+            const interval = setInterval(() => {
+                element.innerText = finalValue.split('')
+                    .map((char, index) => {
+                        if(index < iterations) return finalValue[index];
+                        return chars[Math.floor(Math.random() * chars.length)];
+                    }).join('');
+                if(iterations >= finalValue.length) clearInterval(interval);
+                iterations += 1/2; // 控制解密速度
+            }, 30);
+        }
+
+        // ==========================================
+        // 🕶️ 3D 核心 (跟随鼠标互动)
+        // ==========================================
+        const init3D = () => {
+            try {
+                const container = document.getElementById('three-container');
+                const scene = new THREE.Scene();
+                const camera = new THREE.PerspectiveCamera(75, container.clientWidth/container.clientHeight, 0.1, 1000);
+                const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
+                renderer.setSize(container.clientWidth, container.clientHeight);
+                container.innerHTML = '';
+                container.appendChild(renderer.domElement);
+
+                // 复杂的二十面体
+                const geometry = new THREE.IcosahedronGeometry(2, 2);
+                const material = new THREE.PointsMaterial({ color: 0x06b6d4, size: 0.04, transparent: true, opacity: 0.6 });
+                sphereMesh = new THREE.Points(geometry, material);
+                scene.add(sphereMesh);
+
+                // 内核
+                const coreGeo = new THREE.IcosahedronGeometry(1, 0);
+                const coreMat = new THREE.MeshBasicMaterial({ color: 0x00ffff, wireframe: true, transparent: true, opacity: 0.2 });
+                const core = new THREE.Mesh(coreGeo, coreMat);
+                scene.add(core);
+
+                camera.position.z = 5;
+
+                // 鼠标交互变量
+                let mouseX = 0;
+                let mouseY = 0;
+                let targetX = 0;
+                let targetY = 0;
+
+                // 监听鼠标移动
+                container.addEventListener('mousemove', (e) => {
+                    mouseX = (e.clientX - window.innerWidth / 2) * 0.005;
+                    mouseY = (e.clientY - window.innerHeight / 2) * 0.005;
+                });
+
+                const animate = () => {
+                    requestAnimationFrame(animate);
+
+                    // 缓动跟随逻辑
+                    targetX = mouseX * 0.5;
+                    targetY = mouseY * 0.5;
+
+                    if(sphereMesh) {
+                        sphereMesh.rotation.y += 0.05 * (targetX - sphereMesh.rotation.y);
+                        sphereMesh.rotation.x += 0.05 * (targetY - sphereMesh.rotation.x);
+                        // 自转
+                        sphereMesh.rotation.z += 0.002;
+                    }
+                    if(core) {
+                        core.rotation.y -= 0.01;
+                        core.rotation.z += 0.01;
+                    }
+
+                    renderer.render(scene, camera);
+                };
+                animate();
+                window.addEventListener('resize', () => {
+                    camera.aspect = container.clientWidth/container.clientHeight;
+                    camera.updateProjectionMatrix();
+                    renderer.setSize(container.clientWidth, container.clientHeight);
+                    if(radarChart) radarChart.resize();
+                });
+            } catch(e) { console.warn("3D加载失败", e); }
+        };
+
+        // 2. 初始化图表
+        radarChart = echarts.init(document.getElementById('radar-chart'));
+        const defaultRadarOption = {
+            radar: {
+                radius: '60%', center: ['50%', '55%'],
+                indicator: [ { name: '愤怒', max: 100 }, { name: '喜悦', max: 100 }, { name: '忧伤', max: 100 }, { name: '平静', max: 100 }, { name: '恐惧', max: 100 } ],
+                splitArea: { areaStyle: { color: ['rgba(6,182,212,0.1)', 'transparent'] } },
+                axisName: { color: '#06b6d4', fontSize: 10 }
+            },
+            series: [{ type: 'radar', data: [], lineStyle: { color: '#06b6d4' }, areaStyle: { color: 'rgba(6,182,212,0.3)' } }]
+        };
+        radarChart.setOption(defaultRadarOption);
+
+        // --- 核心功能：搜索 ---
+        window.handleSearch = async function() {
+            playClick(); // 音效
+            const input = document.getElementById('search-input');
+            const username = input.value.trim();
+            if(!username) { Swal.fire({ icon: 'warning', title: '请输入用户名', background: '#000', color: '#fff' }); return; }
+
+            document.getElementById('user-icon').className = "fa-solid fa-spinner animate-spin text-5xl text-cyan-500";
+
+            try {
+                const res = await fetch(`/api/profiler/search_user?username=${username}`);
+                const data = await res.json();
+
+                if(data.status === 'success') {
+                    playSuccess(); // 成功音效
+                    const info = data.user_info;
+                    currentTarget = info.username;
+
+                    document.getElementById('user-icon').className = "fa-solid fa-user-check text-5xl text-green-400 animate__animated animate__pulse";
+
+                    // 应用解密特效
+                    scrambleElement(document.getElementById('display-name'), info.username.toUpperCase());
+                    scrambleElement(document.getElementById('display-id'), `ID: ${Math.random().toString(16).substr(2,8).toUpperCase()}`);
+                    scrambleElement(document.getElementById('status-val'), 'ACTIVE');
+                    scrambleElement(document.getElementById('reg-val'), info.reg_time);
+                    scrambleElement(document.getElementById('logs-val'), info.total_records.toString());
+                    document.getElementById('target-mesh').innerText = info.username.toUpperCase();
+
+                    const btn = document.getElementById('btn-generate');
+                    btn.disabled = false;
+                    btn.className = "bg-cyan-600 text-black px-6 py-2 font-bold text-sm hover:bg-cyan-400 shadow-[0_0_15px_#06b6d4] transition cursor-pointer";
+                    btn.innerHTML = `<i class="fa-solid fa-brain mr-2"></i> 生成深度心理画像`;
+
+                    if(info.has_data) {
+                        const s = info.stats;
+                        const radarData = [ s['愤怒']||0, s['喜悦']||0, s['忧伤']||0, s['平静']||0, s['恐惧']||0 ];
+                        radarChart.setOption({ series: [{ data: [{ value: radarData }] }] });
+
+                        const risk = ((s['愤怒']||0) + (s['恐惧']||0)).toFixed(1);
+                        scrambleElement(document.getElementById('risk-val'), risk + "%");
+                        const riskEl = document.getElementById('risk-val');
+                        riskEl.className = risk > 30 ? "text-red-500 font-bold" : "text-green-500 font-bold";
+
+                        scrambleElement(document.getElementById('top-emo-text'), info.top_emotion);
+                        document.getElementById('top-emo-icon').className = "text-6xl mb-4 text-cyan-400 animate-bounce";
+                    } else {
+                        Swal.fire({ icon: 'info', title: '用户存在', text: '但暂无情绪数据', background: '#000', color: '#fff' });
+                    }
+                } else {
+                    playError();
+                    document.getElementById('user-icon').className = "fa-solid fa-user-slash text-5xl text-red-500";
+                    document.getElementById('display-name').innerText = "NOT FOUND";
+                    Swal.fire({ icon: 'error', title: '查无此人', background: '#000', color: '#fff' });
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        };
+
+        // --- 生成报告 ---
+        window.handleGenerate = async function() {
+            if(!currentTarget) return;
+            playClick();
+            const reportBox = document.getElementById('ai-report');
+            reportBox.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-cyan-500 gap-2"><div class="w-6 h-6 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div><span class="animate-pulse">正在连接神经网络...</span></div>`;
+
+            try {
+                const formData = new FormData();
+                formData.append('username', currentTarget);
+                const res = await fetch('/api/profiler/generate_report', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if(data.status === 'success') {
+                    playSuccess();
+                    reportBox.innerHTML = '';
+                    const content = data.report
+                        .replace(/\n/g, '<br>')
+                        .replace(/\*\*(.*?)\*\*/g, '<b class="text-cyan-400">$1</b>')
+                        .replace(/###\s*(.*)/g, '<h3 class="text-lg font-bold text-white mt-4 border-l-4 border-cyan-500 pl-2">$1</h3>');
+
+                    let i = 0;
+                    const timer = setInterval(() => {
+                        reportBox.innerHTML = content.substring(0, i);
+                        reportBox.scrollTop = reportBox.scrollHeight;
+                        // 随机播放打字音效
+                        if(i % 5 === 0) playTyping();
+
+                        i += 5;
+                        if(i > content.length) {
+                            clearInterval(timer);
+                            reportBox.innerHTML = content;
+                        }
+                    }, 20);
+                } else {
+                    playError();
+                    reportBox.innerHTML = `<span class="text-red-500">Error: ${data.message}</span>`;
+                }
+            } catch(e) {
+                playError();
+                reportBox.innerHTML = `<span class="text-red-500">连接失败</span>`;
+            }
+        };
+
+        window.addEventListener('load', () => {
+            init3D();
+            console.log("System Ready");
+            document.getElementById('btn-search').addEventListener('click', window.handleSearch);
+            document.getElementById('btn-generate').addEventListener('click', window.handleGenerate);
+            document.getElementById('search-input').addEventListener('keypress', (e) => { if(e.key === 'Enter') window.handleSearch(); });
+        });
+    </script>
+</body>
+</html>

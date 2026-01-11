@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>SENTINEL // 威胁预警</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Black+Ops+One&family=Share+Tech+Mono&display=swap');
+        body { background: #0f0505; color: #fca5a5; font-family: 'Share Tech Mono', monospace; overflow: hidden; }
+
+        /* 红色警戒风格 */
+        .danger-border { border: 1px solid rgba(239, 68, 68, 0.3); background: rgba(239, 68, 68, 0.05); position: relative; box-shadow: inset 0 0 20px rgba(239, 68, 68, 0.05); overflow: hidden; }
+        .danger-border::before { content: ''; position: absolute; top: -1px; left: -1px; width: 15px; height: 15px; border-top: 2px solid #ef4444; border-left: 2px solid #ef4444; z-index: 10; }
+        .danger-border::after { content: ''; position: absolute; bottom: -1px; right: -1px; width: 15px; height: 15px; border-bottom: 2px solid #ef4444; border-right: 2px solid #ef4444; z-index: 10; }
+
+        /* 视觉滤镜 */
+        .filter-thermal { filter: contrast(150%) hue-rotate(180deg) invert(100%) saturate(300%); }
+        .filter-night { filter: sepia(100%) hue-rotate(90deg) saturate(300%) contrast(120%) brightness(0.8); }
+        .filter-machine { filter: grayscale(100%) contrast(200%) brightness(1.2); }
+
+        .alert-active { animation: flashRed 0.5s infinite; border-color: #ef4444; box-shadow: 0 0 30px #ef4444; }
+        @keyframes flashRed { 0%, 100% { background-color: rgba(239,68,68,0); } 50% { background-color: rgba(239,68,68,0.2); } }
+
+        /* 扫描线 */
+        .scan-line { width: 100%; height: 2px; background: rgba(255, 0, 0, 0.5); position: absolute; top: 0; pointer-events: none; z-index: 20; box-shadow: 0 0 10px rgba(255, 0, 0, 0.8); animation: scan 2s linear infinite; }
+        @keyframes scan { 0% { top: -10%; } 100% { top: 110%; } }
+
+        .red-scroll::-webkit-scrollbar { width: 4px; }
+        .red-scroll::-webkit-scrollbar-thumb { background: #ef4444; }
+
+        .lock-target { animation: lockOn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes lockOn { 0% { transform: scale(2); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="p-4 h-screen flex flex-col gap-4 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]">
+
+    <!-- 顶栏 -->
+    <header class="flex justify-between items-center p-4 border-b-2 border-red-900 bg-black/90 backdrop-blur shrink-0">
+        <div class="flex items-center gap-4">
+            <div id="status-light" class="w-4 h-4 bg-green-600 rounded-sm shadow-[0_0_10px_green]"></div>
+            <h1 class="text-3xl font-['Black_Ops_One'] tracking-widest text-red-500">SENTINEL <span class="text-sm font-mono text-red-300">// THREAT DETECTION</span></h1>
+        </div>
+        <div class="flex gap-8 text-xs text-red-400 font-bold">
+            <div class="flex flex-col items-end"><span>THREAT LEVEL</span><span id="threat-level" class="text-xl text-green-500">LOW</span></div>
+            <div class="flex flex-col items-end"><span>TARGETS</span><span id="threat-count" class="text-xl text-white">0</span></div>
+            <button onclick="window.location.href='/'" class="border border-red-800 px-6 hover:bg-red-900/50 transition bg-black">EXIT</button>
+        </div>
+    </header>
+
+    <div class="flex-1 grid grid-cols-12 gap-4 min-h-0">
+
+        <!-- 左侧：监控矩阵 (Flex 布局修复) -->
+        <div class="col-span-8 flex flex-col gap-4 min-h-0">
+
+            <!-- 主监控位 (flex-1 自动填充) -->
+            <div id="main-cam" class="danger-border flex-1 relative bg-black flex items-center justify-center">
+                <div class="scan-line"></div>
+                <div class="absolute top-4 left-4 text-red-500 text-xs z-20 bg-black/70 px-2 border border-red-900">CAM_01 [RGB_MAIN]</div>
+                <img src="/video_feed" class="w-full h-full object-cover opacity-90">
+                <div id="lock-box" class="absolute w-64 h-64 border-2 border-red-500 hidden flex-col items-center justify-between p-2 lock-target z-30 bg-red-500/10 box-border">
+                    <div class="w-full flex justify-between"><span class="bg-red-600 text-black text-[10px] px-1 font-bold">TARGET LOCKED</span><span class="text-red-500 text-[10px] animate-pulse">REC ●</span></div>
+                    <div class="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-red-500 -mt-1 -ml-1"></div>
+                    <div class="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-red-500 -mt-1 -mr-1"></div>
+                    <div class="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-red-500 -mb-1 -ml-1"></div>
+                    <div class="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-red-500 -mb-1 -mr-1"></div>
+                    <div class="text-center"><span id="emotion-tag" class="text-2xl font-bold text-red-500 drop-shadow-[0_0_5px_rgba(255,0,0,0.8)]">ANGER</span><div class="h-1 w-full bg-red-900 mt-1"><div class="h-full bg-red-500 w-[90%]"></div></div><span class="text-[10px] text-red-300">CONFIDENCE: 98.2%</span></div>
+                </div>
+            </div>
+
+            <!-- 次级监控 (固定高度 h-48) -->
+            <div class="h-48 shrink-0 grid grid-cols-3 gap-4">
+                <div class="danger-border bg-black relative overflow-hidden group"><span class="absolute top-2 left-2 text-[10px] text-orange-500 z-10 font-bold bg-black/50 px-1">CAM_02 [THERMAL]</span><img src="/video_feed" class="w-full h-full object-cover filter-thermal opacity-80 group-hover:opacity-100 transition"></div>
+                <div class="danger-border bg-black relative overflow-hidden group"><span class="absolute top-2 left-2 text-[10px] text-green-500 z-10 font-bold bg-black/50 px-1">CAM_03 [NIGHT_VISION]</span><img src="/video_feed" class="w-full h-full object-cover filter-night opacity-80 group-hover:opacity-100 transition"></div>
+                <div class="danger-border bg-black relative overflow-hidden group"><span class="absolute top-2 left-2 text-[10px] text-white z-10 font-bold bg-black/50 px-1">CAM_04 [MACHINE_CV]</span><img src="/video_feed" class="w-full h-full object-cover filter-machine opacity-80 group-hover:opacity-100 transition"></div>
+            </div>
+        </div>
+
+        <!-- 右侧：战术面板 -->
+        <div class="col-span-4 flex flex-col gap-4">
+            <div class="danger-border h-1/2 p-4 flex flex-col bg-black/80">
+                <h3 class="text-red-500 text-sm font-bold mb-2 border-b border-red-900 pb-1 flex justify-between"><span>LIVE EVENT STREAM</span><i class="fa-solid fa-satellite-dish animate-pulse"></i></h3>
+                <div id="event-log" class="flex-1 overflow-y-auto red-scroll font-mono text-[10px] space-y-2 text-red-300/70">
+                    <div class="text-gray-600">>>> SYSTEM INITIALIZED</div><div class="text-green-700">>>> ALL FEEDS ONLINE</div>
+                </div>
+            </div>
+            <div class="danger-border flex-1 p-4 flex flex-col relative overflow-hidden bg-black/90">
+                <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/diagmonds-light.png')] opacity-10 pointer-events-none"></div>
+                <h3 class="text-red-400 text-sm font-bold mb-2 flex justify-between items-center"><span>TACTICAL AI ADVISOR</span><span class="text-[9px] border border-red-800 px-1 rounded text-red-600">AUTO-RESPONSE</span></h3>
+                <div id="ai-tactics" class="flex-1 overflow-y-auto red-scroll text-sm text-red-100 leading-relaxed font-sans p-3 border border-red-900/30 bg-red-900/10 shadow-inner">
+                    <div class="flex h-full items-center justify-center text-red-900 text-xs gap-2"><i class="fa-solid fa-radar fa-spin"></i> SCANNING FOR THREATS...</div>
+                </div>
+                <button id="btn-intercept" onclick="requestAnalysis()" disabled class="mt-4 w-full py-4 bg-gray-900 text-gray-600 font-bold uppercase tracking-[0.2em] border border-gray-800 transition cursor-not-allowed text-xs relative overflow-hidden group">
+                    <span class="relative z-10 group-hover:text-black transition">等待目标锁定</span>
+                    <div class="absolute inset-0 bg-red-600 transform -translate-x-full group-hover:translate-x-0 transition duration-300"></div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 警报遮罩 -->
+    <div id="red-alert-overlay" class="fixed inset-0 bg-red-600/20 z-50 hidden pointer-events-none flex items-center justify-center backdrop-blur-[2px]">
+        <div class="w-full bg-black/90 py-8 border-y-8 border-red-600 text-center transform rotate-0">
+            <h1 class="text-8xl font-black text-red-500 tracking-[0.2em] animate-pulse font-['Black_Ops_One']">WARNING</h1>
+            <p class="text-white text-xl tracking-[0.5em] mt-2 font-bold bg-red-600 inline-block px-4 text-black">HIGH LEVEL THREAT DETECTED</p>
+        </div>
+    </div>
+
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playAlarmSound() {
+            if(audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(600, audioCtx.currentTime);
+            osc.frequency.linearRampToValueAtTime(1200, audioCtx.currentTime + 0.3);
+            osc.frequency.linearRampToValueAtTime(600, audioCtx.currentTime + 0.6);
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.6);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + 0.6);
+        }
+
+        let isThreatActive = false; let lastThreatTime = 0; let currentThreatData = "";
+
+        // 核心循环：检查数据
+        setInterval(async () => {
+            try {
+                const res = await fetch('/api/get_data');
+                const data = await res.json();
+                const emos = data.emotions;
+
+                const threatScore = Math.max(emos['愤怒'], emos['恐惧']);
+                const threatType = emos['愤怒'] > emos['恐惧'] ? "愤怒 (ANGER)" : "恐惧 (FEAR)";
+
+                if (threatScore > 40) {
+                    if (!isThreatActive) activateThreatMode(threatType, threatScore);
+                    updateLockBox(threatType, threatScore);
+                } else {
+                    if (isThreatActive && Date.now() - lastThreatTime > 3000) deactivateThreatMode();
+                }
+                if (!isThreatActive && Math.random() > 0.9) addLog(`SCANNING... IDLE`, "text-gray-600");
+            } catch (e) {}
+        }, 500);
+
+        function activateThreatMode(type, score) {
+            isThreatActive = true; lastThreatTime = Date.now();
+            currentThreatData = `目标检测: ${type}, 强度: ${score.toFixed(1)}%, 场景: 哨兵监控点A`;
+
+            document.getElementById('red-alert-overlay').classList.remove('hidden');
+            document.getElementById('red-alert-overlay').classList.add('alert-active');
+            document.getElementById('main-cam').classList.add('border-4', 'border-red-600');
+            document.getElementById('status-light').className = "w-4 h-4 bg-red-600 rounded-full animate-ping";
+
+            document.getElementById('threat-level').innerText = "CRITICAL";
+            document.getElementById('threat-level').className = "text-xl text-red-500 font-bold animate-pulse";
+            document.getElementById('threat-count').innerText = "1";
+            document.getElementById('threat-count').className = "text-xl text-red-500 font-bold";
+
+            document.getElementById('lock-box').classList.remove('hidden');
+            document.getElementById('lock-box').classList.add('flex');
+
+            const btn = document.getElementById('btn-intercept');
+            btn.disabled = false;
+            btn.className = "mt-4 w-full py-4 bg-red-600 text-white font-bold uppercase tracking-[0.2em] hover:bg-red-500 shadow-[0_0_20px_#ef4444] transition animate-pulse cursor-pointer";
+            btn.innerText = ">> 请求 AI 战术干预 <<";
+
+            addLog(`⚠️ THREAT DETECTED: ${type}`, "text-red-500 font-bold bg-red-900/20");
+            playAlarmSound();
+        }
+
+        function updateLockBox(type, score) {
+            lastThreatTime = Date.now();
+            document.getElementById('emotion-tag').innerText = type.split(" ")[1];
+            const box = document.getElementById('lock-box');
+            box.style.transform = `translate(${Math.random()*2}px, ${Math.random()*2}px)`;
+        }
+
+        function deactivateThreatMode() {
+            isThreatActive = false;
+            document.getElementById('red-alert-overlay').classList.add('hidden');
+            document.getElementById('red-alert-overlay').classList.remove('alert-active');
+            document.getElementById('main-cam').classList.remove('border-4', 'border-red-600');
+            document.getElementById('status-light').className = "w-4 h-4 bg-green-600 rounded-sm shadow-[0_0_10px_green]";
+            document.getElementById('threat-level').innerText = "LOW";
+            document.getElementById('threat-level').className = "text-xl text-green-500";
+            document.getElementById('threat-count').innerText = "0";
+            document.getElementById('threat-count').className = "text-xl text-white";
+            document.getElementById('lock-box').classList.add('hidden');
+            addLog("TARGET LOST / NORMALIZED", "text-green-500");
+        }
+
+        function addLog(msg, classes) {
+            const log = document.getElementById('event-log');
+            const time = new Date().toLocaleTimeString('en-GB');
+            log.innerHTML += `<div class="${classes} border-l-2 border-transparent hover:border-red-500 pl-2 mb-1"><span class="opacity-50">[${time}]</span> ${msg}</div>`;
+            log.scrollTop = log.scrollHeight;
+        }
+
+        // --- 核心修复：请求 AI 分析 ---
+        async function requestAnalysis() {
+            if(!currentThreatData) return;
+
+            const aiBox = document.getElementById('ai-tactics');
+            const btn = document.getElementById('btn-intercept');
+
+            btn.innerText = "正在接入战术指挥网...";
+            btn.classList.remove('animate-pulse', 'bg-red-600');
+            btn.classList.add('bg-gray-800');
+
+            aiBox.innerHTML = `<div class="flex flex-col items-center justify-center h-full text-red-500 gap-2"><div class="w-8 h-8 border-4 border-red-500 border-t-transparent rounded-full animate-spin"></div><p>计算最优应对方案...</p></div>`;
+
+            try {
+                // 构造表单数据
+                const formData = new FormData();
+                formData.append('threat_data', currentThreatData);
+
+                // 发送到你 main.py 里已经写好的接口
+                const res = await fetch('/api/sentinel/analyze_threat', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if(data.status === 'success') {
+                    aiBox.innerHTML = '';
+                    const content = data.report.replace(/\n/g, '<br>'); // 直接显示 HTML
+
+                    let i = 0;
+                    const timer = setInterval(() => {
+                        aiBox.innerHTML = content.substring(0, i);
+                        aiBox.scrollTop = aiBox.scrollHeight;
+                        i += 5;
+                        if(i > content.length) {
+                            clearInterval(timer);
+                            aiBox.innerHTML = content;
+                            btn.innerText = "威胁已处置 // 归档";
+                            btn.className = "mt-4 w-full py-4 bg-green-900/50 text-green-400 font-bold border border-green-700 hover:bg-green-800 transition";
+                            btn.onclick = () => { window.location.reload(); };
+                        }
+                    }, 10);
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch(e) {
+                aiBox.innerHTML = `<p class="text-red-500">连接失败: ${e.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Exam Center // 考试中心</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap');
+        body { background: #f8fafc; color: #1e293b; font-family: 'Inter', sans-serif; }
+        .exam-card { transition: all 0.3s ease; }
+        .exam-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04); }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex flex-col">
+
+    <!-- 顶部导航 -->
+    <nav class="bg-white border-b border-slate-200 px-8 py-4 flex justify-between items-center sticky top-0 z-50 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/30">
+                <i class="fa-solid fa-graduation-cap"></i>
+            </div>
+            <h1 class="text-xl font-bold tracking-tight text-slate-800">FaceSense <span class="text-blue-600">ExamHub</span></h1>
+        </div>
+        <div class="text-sm text-slate-500 font-medium">
+            <span id="date-display"></span>
+            <a href="/" class="ml-6 text-slate-400 hover:text-blue-600 transition"><i class="fa-solid fa-house"></i> 返回首页</a>
+        </div>
+    </nav>
+
+    <!-- 主体内容 -->
+    <div class="container mx-auto px-8 py-12 flex-1">
+
+        <!-- 欢迎语 -->
+        <div class="mb-12 text-center space-y-4">
+            <h2 class="text-4xl font-bold text-slate-900">选择当前进行的考试</h2>
+            <p class="text-slate-500 max-w-2xl mx-auto">请确保您的摄像头功能正常。考试期间 FaceSense 系统将全程监测专注度与情绪状态，请保持面部位于屏幕中央。</p>
+        </div>
+
+        <!-- 试卷网格 -->
+        <div id="exam-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <!-- 骨架屏 (加载中) -->
+            <div class="animate-pulse bg-white p-6 rounded-2xl border border-slate-100 h-48"></div>
+            <div class="animate-pulse bg-white p-6 rounded-2xl border border-slate-100 h-48"></div>
+            <div class="animate-pulse bg-white p-6 rounded-2xl border border-slate-100 h-48"></div>
+        </div>
+
+        <!-- 空状态提示 -->
+        <div id="empty-state" class="hidden text-center py-20">
+            <div class="inline-flex items-center justify-center w-24 h-24 bg-slate-100 rounded-full mb-6 text-slate-300 text-4xl">
+                <i class="fa-regular fa-folder-open"></i>
+            </div>
+            <h3 class="text-xl font-bold text-slate-700">暂无考试安排</h3>
+            <p class="text-slate-500 mt-2">老师还没有发布任何试卷，请稍后再来。</p>
+        </div>
+
+    </div>
+
+    <!-- 底部 -->
+    <footer class="text-center py-8 text-xs text-slate-400">
+        &copy; 2025 FaceSense Intelligent Education System. All Rights Reserved.
+    </footer>
+
+    <script>
+        // 日期显示
+        const now = new Date();
+        document.getElementById('date-display').innerText = now.toLocaleDateString() + " " + (now.getHours()<12?"上午":"下午");
+
+        // 加载试卷列表
+        async function loadExams() {
+            const grid = document.getElementById('exam-grid');
+            const empty = document.getElementById('empty-state');
+
+            try {
+                const res = await fetch('/api/exam/list_all');
+                const data = await res.json();
+
+                grid.innerHTML = ""; // 清除骨架屏
+
+                if (data.exams.length === 0) {
+                    empty.classList.remove('hidden');
+                    return;
+                }
+
+                data.exams.forEach(exam => {
+                    // 随机生成一个渐变色封面条
+                    const gradients = [
+                        'from-blue-500 to-cyan-400',
+                        'from-purple-500 to-pink-400',
+                        'from-emerald-500 to-teal-400',
+                        'from-orange-500 to-amber-400'
+                    ];
+                    const bgClass = gradients[Math.floor(Math.random() * gradients.length)];
+
+                    grid.innerHTML += `
+                        <div class="exam-card bg-white rounded-2xl border border-slate-100 overflow-hidden shadow-sm hover:border-blue-200 flex flex-col">
+                            <div class="h-2 w-full bg-gradient-to-r ${bgClass}"></div>
+                            <div class="p-6 flex-1 flex flex-col">
+                                <div class="flex justify-between items-start mb-4">
+                                    <span class="bg-slate-100 text-slate-600 text-xs font-bold px-2 py-1 rounded uppercase tracking-wider">EXAM #${exam.id}</span>
+                                    <span class="text-xs text-slate-400"><i class="fa-regular fa-clock mr-1"></i> ${exam.date.split(' ')[0]}</span>
+                                </div>
+                                <h3 class="text-xl font-bold text-slate-800 mb-2 line-clamp-2">${exam.title}</h3>
+                                <div class="flex items-center gap-2 text-sm text-slate-500 mb-6">
+                                    <div class="w-6 h-6 rounded-full bg-slate-200 flex items-center justify-center text-xs font-bold text-slate-600">${exam.teacher[0].toUpperCase()}</div>
+                                    <span>${exam.teacher} 老师</span>
+                                    <span class="mx-2 text-slate-300">|</span>
+                                    <span>共 ${exam.q_count} 题</span>
+                                </div>
+                                <div class="mt-auto pt-4 border-t border-slate-50">
+                                    <a href="/student/exam/${exam.id}" class="block w-full py-3 bg-slate-900 hover:bg-blue-600 text-white text-center rounded-xl font-bold transition duration-300 flex items-center justify-center gap-2 group">
+                                        开始答题 <i class="fa-solid fa-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+
+            } catch (e) {
+                console.error(e);
+                grid.innerHTML = `<div class="col-span-3 text-center text-red-500 py-10">加载失败，请检查网络连接</div>`;
+            }
+        }
+
+        loadExams();
+    </script>
+</body>
+</html>
