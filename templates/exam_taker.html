@@ -1,0 +1,564 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Smart Exam // 智能考场</title>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>-->
+<!--    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">-->
+<!--    <style>-->
+<!--        body { background: #f1f5f9; color: #1e293b; font-family: sans-serif; height: 100vh; overflow: hidden; }-->
+<!--        .monitor-panel { background: #0f172a; color: #fff; }-->
+<!--        /* 答题区滚动条 */-->
+<!--        .paper-scroll::-webkit-scrollbar { width: 6px; }-->
+<!--        .paper-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="flex">-->
+
+<!--    &lt;!&ndash; 左侧：试卷区域 &ndash;&gt;-->
+<!--    <div class="w-2/3 h-full flex flex-col bg-white shadow-xl relative z-10">-->
+<!--        &lt;!&ndash; 试卷头 &ndash;&gt;-->
+<!--        <div class="p-8 border-b border-gray-200">-->
+<!--            <h1 class="text-3xl font-bold text-gray-800 mb-2" id="exam-title-display">正在加载试卷...</h1>-->
+<!--            <div class="flex gap-4 text-sm text-gray-500">-->
+<!--                <span><i class="fa-regular fa-user mr-1"></i> 考生: <span id="student-name" class="font-bold text-black">Guest</span></span>-->
+<!--                <span><i class="fa-regular fa-clock mr-1"></i> 用时: <span id="timer" class="font-mono font-bold text-blue-600">00:00:00</span></span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 题目列表 &ndash;&gt;-->
+<!--        <div id="paper-content" class="flex-1 overflow-y-auto p-8 paper-scroll space-y-8">-->
+<!--            &lt;!&ndash; 题目由 JS 渲染 &ndash;&gt;-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 底部 &ndash;&gt;-->
+<!--        <div class="p-6 border-t border-gray-200 bg-gray-50 flex justify-between items-center">-->
+<!--            <span class="text-xs text-gray-400">FaceSense Anti-Cheating System Active</span>-->
+<!--            <button onclick="submitExam()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg transition transform hover:-translate-y-1">-->
+<!--                提交答卷-->
+<!--            </button>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 右侧：监考与AI分析 &ndash;&gt;-->
+<!--    <div class="w-1/3 h-full monitor-panel flex flex-col p-6 border-l-4 border-cyan-500">-->
+<!--        <h2 class="text-cyan-400 font-bold tracking-widest mb-4 flex items-center gap-2">-->
+<!--            <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span> 实时监考终端-->
+<!--        </h2>-->
+
+<!--        &lt;!&ndash; 摄像头画面 &ndash;&gt;-->
+<!--        <div class="relative rounded-xl overflow-hidden border border-cyan-500/30 bg-black aspect-video mb-6">-->
+<!--            <img src="/video_feed" class="w-full h-full object-cover opacity-90">-->
+<!--            <div class="absolute top-2 right-2 text-[10px] text-green-400 font-mono">LIVE FEED</div>-->
+
+<!--            &lt;!&ndash; 实时状态标签 &ndash;&gt;-->
+<!--            <div class="absolute bottom-0 left-0 w-full bg-black/60 backdrop-blur p-2 flex justify-between">-->
+<!--                <span class="text-xs text-gray-300">当前情绪: <b id="curr-emo" class="text-white">Analyzing...</b></span>-->
+<!--                <span class="text-xs text-gray-300">专注度: <b id="curr-focus" class="text-cyan-400">&#45;&#45;</b></span>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 专注度曲线 &ndash;&gt;-->
+<!--        <div class="flex-1 bg-slate-800/50 rounded-xl border border-slate-700 p-2 relative">-->
+<!--            <h3 class="text-xs text-gray-500 absolute top-2 left-2">ATTENTION SPAN HISTORY</h3>-->
+<!--            <div id="focus-chart" class="w-full h-full"></div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 警告日志 &ndash;&gt;-->
+<!--        <div class="mt-4 h-32 bg-black rounded-lg p-3 font-mono text-[10px] overflow-y-auto text-gray-500 space-y-1" id="exam-logs">-->
+<!--            <div class="text-green-600">>>> 考试环境初始化完成</div>-->
+<!--            <div class="text-cyan-600">>>> 面部特征点锁定</div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        // -&#45;&#45; 1. 获取试卷数据 -&#45;&#45;-->
+<!--        // Jinja2 模板注入-->
+<!--        const examTitle = "{{ exam_title }}";-->
+<!--        const questionsRaw = `{{ exam_questions | safe }}`;-->
+
+<!--        let questions = [];-->
+<!--        try {-->
+<!--            questions = JSON.parse(questionsRaw || '[]');-->
+<!--        } catch (e) {-->
+<!--            console.error("题目解析失败", e);-->
+<!--            Swal.fire("错误", "试卷数据损坏", "error");-->
+<!--        }-->
+
+<!--        const examId = "{{ exam_id }}";-->
+
+<!--        let startTime = Date.now();-->
+<!--        let emotionLogs = []; // 记录全程情绪-->
+<!--        let focusScore = 80;  // 初始分-->
+
+<!--        // 渲染页面-->
+<!--        document.getElementById('exam-title-display').innerText = examTitle;-->
+<!--        const paper = document.getElementById('paper-content');-->
+
+<!--        questions.forEach((q, idx) => {-->
+<!--            const box = document.createElement('div');-->
+<!--            box.className = "bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition hover:shadow-md";-->
+
+<!--            let html = `<h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2"><span class="text-blue-500 mr-2 font-mono">Q${idx+1}.</span> ${q.title}</h3>`;-->
+
+<!--            if(q.type === 'choice') {-->
+<!--                // ============================================-->
+<!--                // 🟢 核心修复：智能分割逻辑-->
+<!--                // ============================================-->
+<!--                let opts = [];-->
+<!--                const rawOpts = q.options || "";-->
+
+<!--                if (rawOpts.includes('$$')) {-->
+<!--                    // 方案 A：优先检测 $$ (AI 导入的数学题专用)-->
+<!--                    // 这样即使内容里有逗号 (1,0) 也不会被切断-->
+<!--                    opts = rawOpts.split('$$');-->
+<!--                } else if (rawOpts.includes('，')) {-->
+<!--                    // 方案 B：老师手动输入的中文逗号-->
+<!--                    opts = rawOpts.split('，');-->
+<!--                } else {-->
+<!--                    // 方案 C：最后的手段，英文逗号 (对于数学题这步是危险的，但有了方案A，数学题不会走到这一步)-->
+<!--                    opts = rawOpts.split(',');-->
+<!--                }-->
+
+<!--                // 渲染选项-->
+<!--                html += `<div class="space-y-3">`;-->
+<!--                opts.forEach(opt => {-->
+<!--                    const cleanOpt = opt.trim();-->
+<!--                    if(cleanOpt) {-->
+<!--                        html += `-->
+<!--                            <label class="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition group">-->
+<!--                                <div class="relative flex items-center justify-center w-5 h-5 mr-3">-->
+<!--                                    <input type="radio" name="q_${idx}" value="${cleanOpt}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-full checked:border-blue-500 checked:bg-blue-500 transition-all">-->
+<!--                                    <div class="absolute w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></div>-->
+<!--                                </div>-->
+<!--                                <span class="text-gray-700 group-hover:text-blue-700 text-sm md:text-base">${cleanOpt}</span>-->
+<!--                            </label>`;-->
+<!--                    }-->
+<!--                });-->
+<!--                html += `</div>`;-->
+
+<!--            } else if (q.type === 'text') {-->
+<!--                html += `<textarea name="q_${idx}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-4 text-sm focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none transition resize-none" rows="4" placeholder="在此输入您的答案..."></textarea>`;-->
+<!--            } else if (q.type === 'photo') {-->
+<!--                html += `<div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition group">-->
+<!--                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition">-->
+<!--                                <i class="fa-solid fa-camera text-xl text-gray-400 group-hover:text-blue-500"></i>-->
+<!--                            </div>-->
+<!--                            <p class="text-sm font-bold text-gray-600 group-hover:text-blue-600">点击上传图片或拍照</p>-->
+<!--                            <p class="text-xs text-gray-400 mt-1">支持 JPG, PNG 格式</p>-->
+<!--                            <input type="file" name="q_${idx}" class="hidden">-->
+<!--                         </div>`;-->
+<!--            }-->
+<!--            box.innerHTML = html;-->
+<!--            paper.appendChild(box);-->
+<!--        });-->
+
+<!--        // -&#45;&#45; 2. 实时监控逻辑 -&#45;&#45;-->
+<!--        const chart = echarts.init(document.getElementById('focus-chart'));-->
+<!--        const chartOption = {-->
+<!--            grid: { top: 10, bottom: 0, left: 0, right: 0 },-->
+<!--            xAxis: { type: 'category', show: false, data: [] },-->
+<!--            yAxis: { type: 'value', min: 0, max: 100, show: false },-->
+<!--            series: [{-->
+<!--                type: 'line',-->
+<!--                data: [],-->
+<!--                smooth: true,-->
+<!--                showSymbol: false,-->
+<!--                lineStyle: { color: '#22d3ee', width: 2 },-->
+<!--                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(34,211,238,0.3)'},{offset:1,color:'transparent'}]) }-->
+<!--            }]-->
+<!--        };-->
+<!--        const chartData = [];-->
+
+<!--        // 定时器：每秒获取情绪数据-->
+<!--        setInterval(async () => {-->
+<!--            try {-->
+<!--                // 更新时间-->
+<!--                const elapsed = Math.floor((Date.now() - startTime) / 1000);-->
+<!--                const h = Math.floor(elapsed / 3600).toString().padStart(2,'0');-->
+<!--                const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2,'0');-->
+<!--                const s = (elapsed % 60).toString().padStart(2,'0');-->
+<!--                document.getElementById('timer').innerText = `${h}:${m}:${s}`;-->
+
+<!--                // 获取 AI 数据-->
+<!--                const res = await fetch('/api/get_data');-->
+<!--                const data = await res.json();-->
+<!--                const emos = data.emotions;-->
+
+<!--                // 简单的专注度算法-->
+<!--                let currentScore = (emos['平静'] * 1.0 + emos['喜悦'] * 0.5 + emos['惊讶'] * 0.8 + 10); // 基础分补偿-->
+<!--                currentScore = Math.min(100, Math.max(0, currentScore));-->
+
+<!--                // 更新 UI-->
+<!--                const topEmo = Object.keys(emos).reduce((a, b) => emos[a] > emos[b] ? a : b);-->
+<!--                document.getElementById('curr-emo').innerText = topEmo;-->
+
+<!--                const focusEl = document.getElementById('curr-focus');-->
+<!--                focusEl.innerText = currentScore.toFixed(0);-->
+<!--                focusEl.className = currentScore > 60 ? "text-green-400 font-bold" : "text-red-500 font-bold animate-pulse";-->
+
+<!--                // 更新图表-->
+<!--                chartData.push(currentScore);-->
+<!--                if(chartData.length > 50) chartData.shift();-->
+<!--                chartOption.series[0].data = chartData;-->
+<!--                chart.setOption(chartOption);-->
+
+<!--                // 记录日志-->
+<!--                emotionLogs.push({ time: elapsed, emo: topEmo, score: currentScore });-->
+
+<!--                // 异常检测日志-->
+<!--                if(currentScore < 40 && Math.random() > 0.7) {-->
+<!--                    const logBox = document.getElementById('exam-logs');-->
+<!--                    const div = document.createElement('div');-->
+<!--                    div.className = "text-red-400 border-l-2 border-red-500 pl-2 mb-1";-->
+<!--                    div.innerText = `[${new Date().toLocaleTimeString()}] ⚠️ 专注度过低 (${currentScore.toFixed(0)}%)`;-->
+<!--                    logBox.prepend(div);-->
+<!--                }-->
+
+<!--            } catch(e) {}-->
+<!--        }, 1000);-->
+
+<!--        window.onresize = () => chart.resize();-->
+
+<!--        // -&#45;&#45; 3. 提交试卷 -&#45;&#45;-->
+<!--        async function submitExam() {-->
+<!--            const { value: studentName } = await Swal.fire({-->
+<!--                title: '提交答卷',-->
+<!--                input: 'text',-->
+<!--                inputLabel: '请输入您的姓名',-->
+<!--                inputPlaceholder: '例如：张三',-->
+<!--                showCancelButton: true,-->
+<!--                confirmButtonColor: '#2563eb',-->
+<!--                background: '#f8fafc',-->
+<!--                color: '#1e293b'-->
+<!--            });-->
+
+<!--            if(!studentName) return;-->
+
+<!--            // 收集答案 (简单演示收集 text 和 radio)-->
+<!--            const answers = {};-->
+<!--            // 实际逻辑：遍历 questions，根据 name 获取 value-->
+
+<!--            // 计算平均专注度-->
+<!--            const avgFocus = emotionLogs.length ? (emotionLogs.reduce((acc, curr) => acc + curr.score, 0) / emotionLogs.length) : 80;-->
+
+<!--            const formData = new FormData();-->
+<!--            formData.append('exam_id', examId);-->
+<!--            formData.append('student_name', studentName);-->
+<!--            formData.append('answers', JSON.stringify(answers));-->
+<!--            formData.append('emotion_log', JSON.stringify(emotionLogs));-->
+<!--            formData.append('avg_score', avgFocus.toFixed(1));-->
+
+<!--            Swal.fire({ title: '正在加密上传...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });-->
+
+<!--            try {-->
+<!--                const res = await fetch('/api/exam/submit', { method: 'POST', body: formData });-->
+<!--                const data = await res.json();-->
+
+<!--                if(data.status === 'success') {-->
+<!--                    Swal.fire({-->
+<!--                        icon: 'success',-->
+<!--                        title: '考试结束',-->
+<!--                        html: `<p class="mb-4 text-gray-600">${data.ai_comment}</p><p class="text-sm text-gray-400">窗口即将关闭</p>`,-->
+<!--                        timer: 5000,-->
+<!--                        timerProgressBar: true-->
+<!--                    }).then(() => window.location.href='/');-->
+<!--                }-->
+<!--            } catch(e) {-->
+<!--                Swal.fire('提交失败', e.message, 'error');-->
+<!--            }-->
+<!--        }-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart Exam // 智能考场</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body { background: #f1f5f9; color: #1e293b; font-family: sans-serif; height: 100vh; overflow: hidden; }
+        .monitor-panel { background: #0f172a; color: #fff; }
+        /* 答题区滚动条 */
+        .paper-scroll::-webkit-scrollbar { width: 6px; }
+        .paper-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    </style>
+</head>
+<body class="flex">
+
+    <!-- 左侧：试卷区域 -->
+    <div class="w-2/3 h-full flex flex-col bg-white shadow-xl relative z-10">
+        <!-- 试卷头 -->
+        <div class="p-8 border-b border-gray-200">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2" id="exam-title-display">正在加载试卷...</h1>
+            <div class="flex gap-4 text-sm text-gray-500">
+                <span><i class="fa-regular fa-user mr-1"></i> 考生: <span id="student-name" class="font-bold text-black">Guest</span></span>
+                <span><i class="fa-regular fa-clock mr-1"></i> 用时: <span id="timer" class="font-mono font-bold text-blue-600">00:00:00</span></span>
+            </div>
+        </div>
+
+        <!-- 题目列表 -->
+        <div id="paper-content" class="flex-1 overflow-y-auto p-8 paper-scroll space-y-8">
+            <!-- 题目由 JS 渲染 -->
+        </div>
+
+        <!-- 底部 -->
+        <div class="p-6 border-t border-gray-200 bg-gray-50 flex justify-between items-center">
+            <span class="text-xs text-gray-400">FaceSense Anti-Cheating System Active</span>
+            <button onclick="submitExam()" class="bg-blue-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-blue-700 shadow-lg transition transform hover:-translate-y-1">
+                提交答卷
+            </button>
+        </div>
+    </div>
+
+    <!-- 右侧：监考与AI分析 -->
+    <div class="w-1/3 h-full monitor-panel flex flex-col p-6 border-l-4 border-cyan-500">
+        <h2 class="text-cyan-400 font-bold tracking-widest mb-4 flex items-center gap-2">
+            <span class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></span> 实时监考终端
+        </h2>
+
+        <!-- 摄像头画面 -->
+        <div class="relative rounded-xl overflow-hidden border border-cyan-500/30 bg-black aspect-video mb-6">
+            <!-- 调用 main.py 的视频流接口 -->
+            <img src="/video_feed" class="w-full h-full object-cover opacity-90">
+            <div class="absolute top-2 right-2 text-[10px] text-green-400 font-mono">LIVE FEED</div>
+
+            <!-- 实时状态标签 -->
+            <div class="absolute bottom-0 left-0 w-full bg-black/60 backdrop-blur p-2 flex justify-between">
+                <span class="text-xs text-gray-300">当前情绪: <b id="curr-emo" class="text-white">Analyzing...</b></span>
+                <span class="text-xs text-gray-300">专注度: <b id="curr-focus" class="text-cyan-400">--</b></span>
+            </div>
+        </div>
+
+        <!-- 专注度曲线 -->
+        <div class="flex-1 bg-slate-800/50 rounded-xl border border-slate-700 p-2 relative">
+            <h3 class="text-xs text-gray-500 absolute top-2 left-2">ATTENTION SPAN HISTORY</h3>
+            <div id="focus-chart" class="w-full h-full"></div>
+        </div>
+
+        <!-- 警告日志 -->
+        <div class="mt-4 h-32 bg-black rounded-lg p-3 font-mono text-[10px] overflow-y-auto text-gray-500 space-y-1" id="exam-logs">
+            <div class="text-green-600">>>> 考试环境初始化完成</div>
+            <div class="text-cyan-600">>>> 面部特征点锁定</div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. 获取后端传来的试卷数据 ---
+        const examTitle = "{{ exam_title }}";
+        const questionsRaw = `{{ exam_questions | safe }}`;
+
+        let questions = [];
+        try {
+            questions = JSON.parse(questionsRaw || '[]');
+        } catch (e) {
+            console.error("题目解析失败", e);
+            Swal.fire("错误", "试卷数据损坏", "error");
+        }
+
+        const examId = "{{ exam_id }}";
+
+        let startTime = Date.now();
+        let emotionLogs = []; // 记录全程情绪
+        let focusScore = 80;  // 初始分
+
+        // 渲染页面
+        document.getElementById('exam-title-display').innerText = examTitle;
+        const paper = document.getElementById('paper-content');
+
+        questions.forEach((q, idx) => {
+            const box = document.createElement('div');
+            box.className = "bg-white p-6 rounded-xl border border-gray-200 shadow-sm transition hover:shadow-md";
+
+            let html = `<h3 class="font-bold text-lg mb-4 text-gray-800 border-b pb-2"><span class="text-blue-500 mr-2 font-mono">Q${idx+1}.</span> ${q.title}</h3>`;
+
+            if(q.type === 'choice') {
+                // 🟢 智能分割逻辑：优先处理数学题 $$，其次中文逗号，最后英文逗号
+                let opts = [];
+                const rawOpts = q.options || "";
+
+                if (rawOpts.includes('$$')) {
+                    opts = rawOpts.split('$$');
+                } else if (rawOpts.includes('，')) {
+                    opts = rawOpts.split('，');
+                } else {
+                    opts = rawOpts.split(',');
+                }
+
+                html += `<div class="space-y-3">`;
+                opts.forEach(opt => {
+                    const cleanOpt = opt.trim();
+                    if(cleanOpt) {
+                        html += `
+                            <label class="flex items-center p-3 rounded-lg border border-gray-100 hover:bg-blue-50 hover:border-blue-200 cursor-pointer transition group">
+                                <div class="relative flex items-center justify-center w-5 h-5 mr-3">
+                                    <input type="radio" name="q_${idx}" value="${cleanOpt}" class="peer appearance-none w-5 h-5 border-2 border-gray-300 rounded-full checked:border-blue-500 checked:bg-blue-500 transition-all">
+                                    <div class="absolute w-2 h-2 bg-white rounded-full opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                </div>
+                                <span class="text-gray-700 group-hover:text-blue-700 text-sm md:text-base">${cleanOpt}</span>
+                            </label>`;
+                    }
+                });
+                html += `</div>`;
+
+            } else if (q.type === 'text') {
+                html += `<textarea name="q_${idx}" class="w-full bg-gray-50 border border-gray-300 rounded-lg p-4 text-sm focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-200 outline-none transition resize-none" rows="4" placeholder="在此输入您的答案..."></textarea>`;
+            } else if (q.type === 'photo') {
+                html += `<div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50/50 transition group">
+                            <div class="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3 group-hover:bg-blue-100 transition">
+                                <i class="fa-solid fa-camera text-xl text-gray-400 group-hover:text-blue-500"></i>
+                            </div>
+                            <p class="text-sm font-bold text-gray-600 group-hover:text-blue-600">点击上传图片或拍照</p>
+                            <p class="text-xs text-gray-400 mt-1">支持 JPG, PNG 格式</p>
+                            <input type="file" name="q_${idx}" class="hidden">
+                         </div>`;
+            }
+            box.innerHTML = html;
+            paper.appendChild(box);
+        });
+
+        // --- 2. 实时监控逻辑 ---
+        const chart = echarts.init(document.getElementById('focus-chart'));
+        const chartOption = {
+            grid: { top: 10, bottom: 0, left: 0, right: 0 },
+            xAxis: { type: 'category', show: false, data: [] },
+            yAxis: { type: 'value', min: 0, max: 100, show: false },
+            series: [{
+                type: 'line',
+                data: [],
+                smooth: true,
+                showSymbol: false,
+                lineStyle: { color: '#22d3ee', width: 2 },
+                areaStyle: { color: new echarts.graphic.LinearGradient(0,0,0,1,[{offset:0,color:'rgba(34,211,238,0.3)'},{offset:1,color:'transparent'}]) }
+            }]
+        };
+        const chartData = [];
+
+        // 每秒同步情绪数据
+        setInterval(async () => {
+            try {
+                // 更新计时器
+                const elapsed = Math.floor((Date.now() - startTime) / 1000);
+                const h = Math.floor(elapsed / 3600).toString().padStart(2,'0');
+                const m = Math.floor((elapsed % 3600) / 60).toString().padStart(2,'0');
+                const s = (elapsed % 60).toString().padStart(2,'0');
+                document.getElementById('timer').innerText = `${h}:${m}:${s}`;
+
+                // 从后端 API 获取实时情绪
+                const res = await fetch('/api/get_data');
+                const data = await res.json();
+                const emos = data.emotions;
+
+                // 计算专注度 (简单算法)
+                let currentScore = (emos['平静'] * 1.0 + emos['喜悦'] * 0.5 + emos['惊讶'] * 0.8 + 10);
+                currentScore = Math.min(100, Math.max(0, currentScore));
+
+                // 更新右侧面板 UI
+                const topEmo = Object.keys(emos).reduce((a, b) => emos[a] > emos[b] ? a : b);
+                document.getElementById('curr-emo').innerText = topEmo;
+
+                const focusEl = document.getElementById('curr-focus');
+                focusEl.innerText = currentScore.toFixed(0);
+                focusEl.className = currentScore > 60 ? "text-green-400 font-bold" : "text-red-500 font-bold animate-pulse";
+
+                // 更新图表
+                chartData.push(currentScore);
+                if(chartData.length > 50) chartData.shift();
+                chartOption.series[0].data = chartData;
+                chart.setOption(chartOption);
+
+                // 记录数据供提交
+                emotionLogs.push({ time: elapsed, emo: topEmo, score: currentScore });
+
+                // 异常检测日志
+                if(currentScore < 40 && Math.random() > 0.7) {
+                    const logBox = document.getElementById('exam-logs');
+                    const div = document.createElement('div');
+                    div.className = "text-red-400 border-l-2 border-red-500 pl-2 mb-1";
+                    div.innerText = `[${new Date().toLocaleTimeString()}] ⚠️ 专注度过低 (${currentScore.toFixed(0)}%)`;
+                    logBox.prepend(div);
+                }
+
+            } catch(e) {}
+        }, 1000);
+
+        window.onresize = () => chart.resize();
+
+        // --- 3. 提交试卷 (完整版) ---
+        async function submitExam() {
+            const { value: studentName } = await Swal.fire({
+                title: '提交答卷',
+                input: 'text',
+                inputLabel: '请输入您的姓名',
+                inputPlaceholder: '例如：张三',
+                showCancelButton: true,
+                confirmButtonColor: '#2563eb',
+                background: '#f8fafc',
+                color: '#1e293b'
+            });
+
+            if(!studentName) return;
+
+            // 🟢 收集答案：把 题目->答案 对应起来，方便老师看
+            const answers = {};
+            questions.forEach((q, idx) => {
+                const key = `Q${idx+1}. ${q.title}`; // 题目作为 Key
+                let val = "未作答";
+
+                if (q.type === 'choice') {
+                    const selected = document.querySelector(`input[name="q_${idx}"]:checked`);
+                    if (selected) val = selected.value;
+                } else if (q.type === 'text') {
+                    const text = document.querySelector(`textarea[name="q_${idx}"]`);
+                    if (text && text.value.trim()) val = text.value.trim();
+                } else if (q.type === 'photo') {
+                    const fileInput = document.querySelector(`input[name="q_${idx}"]`);
+                    if (fileInput && fileInput.files.length > 0) val = "[图片已上传]";
+                }
+                answers[key] = val;
+            });
+
+            // 计算整场考试的平均专注度
+            const avgFocus = emotionLogs.length ? (emotionLogs.reduce((acc, curr) => acc + curr.score, 0) / emotionLogs.length) : 80;
+
+            const formData = new FormData();
+            formData.append('exam_id', examId);
+            formData.append('student_name', studentName);
+            formData.append('answers', JSON.stringify(answers));
+            formData.append('emotion_log', JSON.stringify(emotionLogs));
+            formData.append('avg_score', avgFocus.toFixed(1));
+
+            Swal.fire({ title: '正在加密上传...', didOpen: () => Swal.showLoading(), allowOutsideClick: false });
+
+            try {
+                const res = await fetch('/api/exam/submit', { method: 'POST', body: formData });
+                const data = await res.json();
+
+                if(data.status === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: '考试结束',
+                        html: `<p class="mb-4 text-gray-600">${data.ai_comment}</p><p class="text-sm text-gray-400">窗口即将关闭</p>`,
+                        timer: 5000,
+                        timerProgressBar: true
+                    }).then(() => window.location.href='/student/dashboard'); // 返回大厅
+                }
+            } catch(e) {
+                Swal.fire('提交失败', e.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
+
+
+

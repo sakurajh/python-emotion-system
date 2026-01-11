@@ -1,0 +1,1592 @@
+<!--&lt;!&ndash;<!DOCTYPE html>&ndash;&gt;-->
+<!--&lt;!&ndash;<html lang="zh">&ndash;&gt;-->
+<!--&lt;!&ndash;<head>&ndash;&gt;-->
+<!--&lt;!&ndash;    <meta charset="UTF-8">&ndash;&gt;-->
+<!--&lt;!&ndash;    <title>FaceSense AI | 领先的面部情感分析平台</title>&ndash;&gt;-->
+<!--&lt;!&ndash;    <script src="https://cdn.tailwindcss.com"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>&ndash;&gt;-->
+<!--&lt;!&ndash;    <style>&ndash;&gt;-->
+<!--&lt;!&ndash;        .hero-pattern { background-color: #020617; background-image: radial-gradient(circle at 2px 2px, rgba(255,255,255,0.05) 1px, transparent 0); background-size: 40px 40px; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.1); }&ndash;&gt;-->
+<!--&lt;!&ndash;        .btn-gradient { background: linear-gradient(90deg, #06b6d4, #3b82f6); transition: all 0.3s ease; }&ndash;&gt;-->
+<!--&lt;!&ndash;        .btn-gradient:hover { filter: brightness(1.1); transform: translateY(-2px); }&ndash;&gt;-->
+<!--&lt;!&ndash;    </style>&ndash;&gt;-->
+<!--&lt;!&ndash;</head>&ndash;&gt;-->
+<!--&lt;!&ndash;<body class="hero-pattern text-slate-200 min-h-screen">&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <nav class="container mx-auto p-8 flex justify-between items-center">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="text-2xl font-black italic tracking-widest text-white">FACESENSE <span class="text-cyan-500">AI</span></div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="hidden md:flex space-x-10 text-sm font-bold uppercase tracking-widest">&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="#" class="hover:text-cyan-400">产品介绍</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="#" class="hover:text-cyan-400">技术文档</a>&ndash;&gt;-->
+<!--&lt;!&ndash;            <a href="#" class="hover:text-cyan-400">联系我们</a>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <button onclick="openModal()" class="btn-gradient px-8 py-2.5 rounded-full font-bold text-white shadow-lg shadow-cyan-500/20">立即登录</button>&ndash;&gt;-->
+<!--&lt;!&ndash;    </nav>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <main class="container mx-auto px-8 pt-20 flex flex-col items-center text-center">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="inline-block px-4 py-1.5 mb-6 rounded-full glass text-xs font-bold text-cyan-400 tracking-widest uppercase">&ndash;&gt;-->
+<!--&lt;!&ndash;            🚀 2025 全新面部表情识别引擎已上线&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        <h1 class="text-6xl md:text-8xl font-black text-white mb-8 leading-tight">&ndash;&gt;-->
+<!--&lt;!&ndash;            让机器<br><span class="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">感知每一个微笑</span>&ndash;&gt;-->
+<!--&lt;!&ndash;        </h1>&ndash;&gt;-->
+<!--&lt;!&ndash;        <p class="max-w-2xl text-gray-400 text-lg mb-12 leading-relaxed">&ndash;&gt;-->
+<!--&lt;!&ndash;            FaceSense AI 结合了深度卷积神经网络与实时异步流媒体技术，为您提供企业级的面部情感监测方案，准确度高达 98.4%。&ndash;&gt;-->
+<!--&lt;!&ndash;        </p>&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="flex gap-6">&ndash;&gt;-->
+<!--&lt;!&ndash;            <button onclick="openModal()" class="btn-gradient px-12 py-5 rounded-2xl font-black text-xl">开始免费试用</button>&ndash;&gt;-->
+<!--&lt;!&ndash;            <button class="glass px-12 py-5 rounded-2xl font-black text-xl hover:bg-white/5 transition">了解技术原理</button>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;        &lt;!&ndash; 功能介绍区 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mt-32 w-full max-w-6xl">&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="glass p-10 rounded-[3rem] text-left">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="text-3xl mb-4">⚡</div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <h4 class="text-xl font-bold mb-3 text-white">低延迟响应</h4>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="text-gray-500 text-sm leading-relaxed">采用后端异步线程处理，确保 30FPS 丝滑视频流与 AI 识别互不干扰。</p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="glass p-10 rounded-[3rem] text-left">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="text-3xl mb-4">🎭</div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <h4 class="text-xl font-bold mb-3 text-white">全维度分析</h4>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="text-gray-500 text-sm leading-relaxed">支持识别 7 种核心情感维度，并实时生成量化数据报表。</p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;            <div class="glass p-10 rounded-[3rem] text-left">&ndash;&gt;-->
+<!--&lt;!&ndash;                <div class="text-3xl mb-4">🔒</div>&ndash;&gt;-->
+<!--&lt;!&ndash;                <h4 class="text-xl font-bold mb-3 text-white">隐私保护</h4>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="text-gray-500 text-sm leading-relaxed">数据本地处理，加密传输，为您的生物特征信息保驾护航。</p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </main>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    &lt;!&ndash; 登录注册模态框 &ndash;&gt;&ndash;&gt;-->
+<!--&lt;!&ndash;    <div id="authModal" class="fixed inset-0 bg-black/80 z-50 hidden flex items-center justify-center backdrop-blur-md p-4">&ndash;&gt;-->
+<!--&lt;!&ndash;        <div class="glass p-10 rounded-[3rem] w-full max-w-md relative shadow-2xl">&ndash;&gt;-->
+<!--&lt;!&ndash;            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition">✕</button>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div id="loginForm">&ndash;&gt;-->
+<!--&lt;!&ndash;                <h2 class="text-3xl font-bold mb-2 text-white">欢迎登录</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="text-gray-500 mb-8 text-sm tracking-wide">请输入您的账号开启 AI 监控</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                <form onsubmit="handleAuth(event, '/api/login')" class="space-y-5">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="text" name="username" placeholder="账号 (测试: admin)" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none text-white">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="password" name="password" placeholder="密码 (测试: 123456)" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none text-white">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <button class="w-full py-4 btn-gradient rounded-2xl font-bold text-lg shadow-lg">登 录 系 统</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                </form>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="mt-6 text-center text-sm text-gray-500">没有账号? <a href="javascript:toggleForm()" class="text-cyan-400">立即注册试用账号</a></p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;            <div id="regForm" class="hidden">&ndash;&gt;-->
+<!--&lt;!&ndash;                <h2 class="text-3xl font-bold mb-2 text-white">创建账号</h2>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="text-gray-500 mb-8 text-sm tracking-wide">注册后即可进入 AI 智能控制台</p>&ndash;&gt;-->
+<!--&lt;!&ndash;                <form onsubmit="handleAuth(event, '/api/register')" class="space-y-5">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="text" name="username" placeholder="设置用户名" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none text-white">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <input type="password" name="password" placeholder="设置密码" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none text-white">&ndash;&gt;-->
+<!--&lt;!&ndash;                    <button class="w-full py-4 bg-white text-black rounded-2xl font-bold text-lg hover:bg-gray-200 transition">完成注册</button>&ndash;&gt;-->
+<!--&lt;!&ndash;                </form>&ndash;&gt;-->
+<!--&lt;!&ndash;                <p class="mt-6 text-center text-sm text-gray-500">已有账号? <a href="javascript:toggleForm()" class="text-cyan-400">返回登录</a></p>&ndash;&gt;-->
+<!--&lt;!&ndash;            </div>&ndash;&gt;-->
+<!--&lt;!&ndash;        </div>&ndash;&gt;-->
+<!--&lt;!&ndash;    </div>&ndash;&gt;-->
+
+<!--&lt;!&ndash;    <script>&ndash;&gt;-->
+<!--&lt;!&ndash;        function openModal() { document.getElementById('authModal').classList.remove('hidden'); }&ndash;&gt;-->
+<!--&lt;!&ndash;        function closeModal() { document.getElementById('authModal').classList.add('hidden'); }&ndash;&gt;-->
+<!--&lt;!&ndash;        function toggleForm() {&ndash;&gt;-->
+<!--&lt;!&ndash;            document.getElementById('loginForm').classList.toggle('hidden');&ndash;&gt;-->
+<!--&lt;!&ndash;            document.getElementById('regForm').classList.toggle('hidden');&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+
+<!--&lt;!&ndash;        async function handleAuth(event, url) {&ndash;&gt;-->
+<!--&lt;!&ndash;            event.preventDefault();&ndash;&gt;-->
+<!--&lt;!&ndash;            const res = await fetch(url, { method: 'POST', body: new FormData(event.target) });&ndash;&gt;-->
+<!--&lt;!&ndash;            const data = await res.json();&ndash;&gt;-->
+<!--&lt;!&ndash;            if (data.status === 'success') {&ndash;&gt;-->
+<!--&lt;!&ndash;                if (data.redirect) window.location.href = data.redirect;&ndash;&gt;-->
+<!--&lt;!&ndash;                else {&ndash;&gt;-->
+<!--&lt;!&ndash;                    Swal.fire({ icon: 'success', title: data.message, background: '#1e293b', color: '#fff' });&ndash;&gt;-->
+<!--&lt;!&ndash;                    toggleForm();&ndash;&gt;-->
+<!--&lt;!&ndash;                }&ndash;&gt;-->
+<!--&lt;!&ndash;            } else {&ndash;&gt;-->
+<!--&lt;!&ndash;                Swal.fire({ icon: 'error', title: '操作失败', text: data.message, background: '#1e293b', color: '#fff' });&ndash;&gt;-->
+<!--&lt;!&ndash;            }&ndash;&gt;-->
+<!--&lt;!&ndash;        }&ndash;&gt;-->
+<!--&lt;!&ndash;    </script>&ndash;&gt;-->
+<!--&lt;!&ndash;</body>&ndash;&gt;-->
+<!--&lt;!&ndash;</html>&ndash;&gt;-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>FaceSense AI | 智能面部识别门户</title>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        body { background: #020617; color: #f8fafc; }-->
+<!--        .hero-bg { background: radial-gradient(circle at 80% 20%, rgba(6, 182, 212, 0.15) 0%, transparent 50%); }-->
+<!--        .glass { background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.1); }-->
+<!--        .btn-glow { background: linear-gradient(90deg, #0891b2, #1e40af); transition: 0.3s; }-->
+<!--        .btn-glow:hover { box-shadow: 0 0 20px rgba(6, 182, 212, 0.5); transform: translateY(-2px); }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="hero-bg min-h-screen">-->
+<!--    &lt;!&ndash; 导航栏 &ndash;&gt;-->
+<!--    <nav class="container mx-auto p-8 flex justify-between items-center">-->
+<!--        <div class="text-2xl font-black italic text-cyan-500 tracking-widest">FACESENSE AI</div>-->
+<!--        <div class="space-x-8 text-sm font-bold uppercase hidden md:flex">-->
+<!--            <a href="#about" class="hover:text-cyan-400">系统介绍</a>-->
+<!--            <a href="#tech" class="hover:text-cyan-400">技术原理</a>-->
+<!--            <button onclick="toggleModal('login')" class="px-6 py-2 border border-cyan-500 rounded-full text-cyan-400 hover:bg-cyan-500 hover:text-white transition">立即登录</button>-->
+<!--        </div>-->
+<!--    </nav>-->
+
+<!--    &lt;!&ndash; 主视觉区 &ndash;&gt;-->
+<!--    <section class="container mx-auto px-8 pt-20 pb-32 flex flex-col items-center text-center">-->
+<!--        <h1 class="text-7xl md:text-9xl font-black mb-8 animate__animated animate__fadeInDown tracking-tighter">-->
+<!--            看透<span class="text-cyan-500">情绪</span><br>掌控数据-->
+<!--        </h1>-->
+<!--        <p class="max-w-2xl text-slate-400 text-lg mb-12 animate__animated animate__fadeInUp animate__delay-1s">-->
+<!--            FaceSense AI 是一款企业级情感识别引擎。通过高清图像采集与深度神经网络，-->
+<!--            将人类面部微表情转化为可量化的实时数据资产。-->
+<!--        </p>-->
+<!--        <div class="flex gap-6">-->
+<!--            <button onclick="toggleModal('login')" class="btn-glow px-12 py-5 rounded-2xl font-black text-xl">开启实时监控</button>-->
+<!--            <button class="glass px-12 py-5 rounded-2xl font-black text-xl">系统演示</button>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; 登录注册模态框 (隐藏) &ndash;&gt;-->
+<!--    <div id="authModal" class="fixed inset-0 bg-black/90 z-50 hidden flex items-center justify-center backdrop-blur-md">-->
+<!--        <div class="glass p-10 rounded-[3rem] w-full max-w-md relative shadow-2xl animate__animated animate__zoomIn">-->
+<!--            <button onclick="toggleModal()" class="absolute top-8 right-8 text-slate-500 hover:text-white">✕</button>-->
+
+<!--            <div id="loginSection">-->
+<!--                <h2 class="text-3xl font-bold mb-2">管理员登录</h2>-->
+<!--                <p class="text-slate-500 mb-8 text-sm">请输入授权账号以访问仪表盘</p>-->
+<!--                <form onsubmit="handleAuth(event, '/api/login')" class="space-y-5">-->
+<!--                    <input type="text" name="username" placeholder="账号 (测试: admin)" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none">-->
+<!--                    <input type="password" name="password" placeholder="密码 (测试: 123456)" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none">-->
+<!--                    <button class="w-full py-4 btn-glow rounded-2xl font-bold text-lg">验证并进入</button>-->
+<!--                </form>-->
+<!--                <p class="mt-6 text-center text-sm text-slate-500">没有访问权限? <a href="javascript:switchTab()" class="text-cyan-400 font-bold">申请注册账号</a></p>-->
+<!--            </div>-->
+
+<!--            <div id="regSection" class="hidden">-->
+<!--                <h2 class="text-3xl font-bold mb-2">申请访问</h2>-->
+<!--                <p class="text-slate-500 mb-8 text-sm">填写信息以创建新的分析员账户</p>-->
+<!--                <form onsubmit="handleAuth(event, '/api/register')" class="space-y-5">-->
+<!--                    <input type="text" name="username" placeholder="设置账号" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none">-->
+<!--                    <input type="password" name="password" placeholder="设置密码" required class="w-full p-4 bg-white/5 border border-white/10 rounded-2xl focus:border-cyan-500 outline-none">-->
+<!--                    <button class="w-full py-4 bg-white text-black rounded-2xl font-bold text-lg">立即提交</button>-->
+<!--                </form>-->
+<!--                <p class="mt-6 text-center text-sm text-slate-500">已有账号? <a href="javascript:switchTab()" class="text-cyan-400 font-bold">返回登录</a></p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        function toggleModal() { document.getElementById('authModal').classList.toggle('hidden'); }-->
+<!--        function switchTab() {-->
+<!--            document.getElementById('loginSection').classList.toggle('hidden');-->
+<!--            document.getElementById('regSection').classList.toggle('hidden');-->
+<!--        }-->
+<!--        async function handleAuth(event, url) {-->
+<!--            event.preventDefault();-->
+<!--            const res = await fetch(url, { method: 'POST', body: new FormData(event.target) });-->
+<!--            const data = await res.json();-->
+<!--            if (data.status === 'success') {-->
+<!--                if (data.redirect) window.location.href = data.redirect;-->
+<!--                else { Swal.fire('成功', data.message, 'success'); switchTab(); }-->
+<!--            } else { Swal.fire('失败', data.message, 'error'); }-->
+<!--        }-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>FaceSense AI // 赋能情感数字化</title>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>-->
+<!--    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">-->
+<!--    <style>-->
+<!--        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');-->
+
+<!--        body {-->
+<!--            background-color: #000;-->
+<!--            color: #fff;-->
+<!--            font-family: 'Space Grotesk', sans-serif;-->
+<!--            overflow-x: hidden;-->
+<!--        }-->
+
+<!--        #particle-canvas {-->
+<!--            position: fixed;-->
+<!--            top: 0; left: 0;-->
+<!--            z-index: 0;-->
+<!--            pointer-events: none;-->
+<!--        }-->
+
+<!--        .glass-nav {-->
+<!--            background: rgba(0, 0, 0, 0.6);-->
+<!--            backdrop-filter: blur(20px);-->
+<!--            border-bottom: 1px solid rgba(6, 182, 212, 0.2);-->
+<!--            z-index: 50;-->
+<!--        }-->
+
+<!--        .hero-gradient {-->
+<!--            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);-->
+<!--            -webkit-background-clip: text;-->
+<!--            -webkit-text-fill-color: transparent;-->
+<!--        }-->
+
+<!--        .tech-card {-->
+<!--            background: rgba(255, 255, 255, 0.02);-->
+<!--            border: 1px solid rgba(255, 255, 255, 0.05);-->
+<!--            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);-->
+<!--        }-->
+
+<!--        .tech-card:hover {-->
+<!--            background: rgba(6, 182, 212, 0.05);-->
+<!--            border-color: rgba(6, 182, 212, 0.5);-->
+<!--            transform: translateY(-10px) scale(1.02);-->
+<!--            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);-->
+<!--        }-->
+
+<!--        .scan-container {-->
+<!--            position: relative;-->
+<!--            width: 300px;-->
+<!--            height: 300px;-->
+<!--            border: 2px solid rgba(6, 182, 212, 0.3);-->
+<!--            border-radius: 50%;-->
+<!--            overflow: hidden;-->
+<!--        }-->
+
+<!--        .scan-line {-->
+<!--            position: absolute;-->
+<!--            width: 100%;-->
+<!--            height: 4px;-->
+<!--            background: #06b6d4;-->
+<!--            box-shadow: 0 0 20px #06b6d4;-->
+<!--            top: 0;-->
+<!--            animation: scan-move 4s ease-in-out infinite;-->
+<!--        }-->
+
+<!--        @keyframes scan-move {-->
+<!--            0%, 100% { top: 0; }-->
+<!--            50% { top: 100%; }-->
+<!--        }-->
+
+<!--        .floating { animation: floating 6s ease-in-out infinite; }-->
+<!--        @keyframes floating {-->
+<!--            0% { transform: translateY(0px); }-->
+<!--            50% { transform: translateY(-20px); }-->
+<!--            100% { transform: translateY(0px); }-->
+<!--        }-->
+
+<!--        /* 极简发光按钮 */-->
+<!--        .btn-premium {-->
+<!--            position: relative;-->
+<!--            overflow: hidden;-->
+<!--            background: #fff;-->
+<!--            color: #000;-->
+<!--            font-weight: 700;-->
+<!--            transition: all 0.3s ease;-->
+<!--        }-->
+<!--        .btn-premium:hover {-->
+<!--            box-shadow: 0 0 30px rgba(6, 182, 212, 0.8);-->
+<!--            transform: scale(1.05);-->
+<!--        }-->
+
+<!--        /* 注册登录弹窗背景 */-->
+<!--        .modal-glass {-->
+<!--            background: rgba(10, 10, 10, 0.8);-->
+<!--            backdrop-filter: blur(30px);-->
+<!--            border: 1px solid rgba(255, 255, 255, 0.1);-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+
+<!--    <canvas id="particle-canvas"></canvas>-->
+
+<!--    &lt;!&ndash; 导航 &ndash;&gt;-->
+<!--    <nav class="glass-nav fixed w-full py-6 px-12 flex justify-between items-center">-->
+<!--        <div class="text-2xl font-bold tracking-tighter flex items-center gap-3">-->
+<!--            <div class="w-6 h-6 bg-cyan-500 rounded-sm rotate-45"></div>-->
+<!--            FACESENSE <span class="text-cyan-500 font-light">// AI</span>-->
+<!--        </div>-->
+<!--        <div class="hidden md:flex gap-12 text-sm font-bold uppercase tracking-widest text-gray-400">-->
+<!--            <a href="#features" class="hover:text-white transition">功能矩阵</a>-->
+<!--            <a href="#about" class="hover:text-white transition">核心架构</a>-->
+<!--            <button onclick="openModal()" class="text-cyan-500 hover:text-cyan-300">系统进入</button>-->
+<!--        </div>-->
+<!--    </nav>-->
+
+<!--    &lt;!&ndash; Hero 主视觉 &ndash;&gt;-->
+<!--    <section class="relative min-h-screen flex items-center justify-center pt-20 px-8 z-10">-->
+<!--        <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">-->
+<!--            <div class="space-y-8 animate__animated animate__fadeInLeft">-->
+<!--                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-cyan-500/30 text-xs font-bold text-cyan-400">-->
+<!--                    <span class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>-->
+<!--                    NEURAL ENGINE V4.0 已就绪-->
+<!--                </div>-->
+<!--                <h1 class="text-7xl lg:text-9xl font-bold leading-none">-->
+<!--                    重新定义<br><span class="hero-gradient italic">人类感知</span>-->
+<!--                </h1>-->
+<!--                <p class="text-gray-400 text-lg max-w-xl leading-relaxed">-->
+<!--                    FaceSense 跨越了传统视觉边界，通过深度残差网络实时捕捉 468 个面部特征点。这不仅仅是识别，这是对数字情感的微秒级洞察。-->
+<!--                </p>-->
+<!--                <div class="flex gap-6">-->
+<!--                    <button onclick="openModal()" class="btn-premium px-10 py-5 rounded-sm uppercase tracking-widest text-sm">-->
+<!--                        立即启动控制台-->
+<!--                    </button>-->
+<!--                    <button class="px-10 py-5 glass border border-white/10 rounded-sm uppercase tracking-widest text-sm font-bold hover:bg-white/5 transition">-->
+<!--                        技术白皮书-->
+<!--                    </button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            &lt;!&ndash; 右侧：动态面部扫描模型 &ndash;&gt;-->
+<!--            <div class="hidden lg:flex justify-center items-center relative animate__animated animate__fadeInRight">-->
+<!--                <div class="floating scan-container glass flex items-center justify-center">-->
+<!--                    <div class="scan-line"></div>-->
+<!--                    &lt;!&ndash; 一个模拟的面部网格图，你可以换成自己的透明图 &ndash;&gt;-->
+<!--                    <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">-->
+<!--                        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"></path>-->
+<!--                        <path d="M8 10h.01"></path>-->
+<!--                        <path d="M16 10h.01"></path>-->
+<!--                        <path d="M9 15c.5 1 1.5 1.5 3 1.5s2.5-.5 3-1.5"></path>-->
+<!--                        <path d="M12 2v2"></path><path d="M12 20v2"></path>-->
+<!--                        <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>-->
+<!--                        <path d="M2 12h2"></path><path d="M20 12h2"></path>-->
+<!--                        <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>-->
+<!--                    </svg>-->
+<!--                    <div class="absolute -bottom-10 text-[10px] font-mono text-cyan-800">FACIAL_MESH_GENERATING...</div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; 功能区 &ndash;&gt;-->
+<!--    <section id="features" class="relative z-10 py-32 container mx-auto px-8">-->
+<!--        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">-->
+<!--            <div class="tech-card p-12 rounded-[2rem] space-y-4">-->
+<!--                <div class="text-cyan-500 text-4xl mb-6">⚡</div>-->
+<!--                <h3 class="text-2xl font-bold">极速推理</h3>-->
+<!--                <p class="text-gray-500 leading-relaxed">基于 FastAPI 异步架构，单帧处理延迟低于 40ms，确保数据实时同步。</p>-->
+<!--            </div>-->
+<!--            <div class="tech-card p-12 rounded-[2rem] space-y-4">-->
+<!--                <div class="text-purple-500 text-4xl mb-6">🎯</div>-->
+<!--                <h3 class="text-2xl font-bold">亚像素精度</h3>-->
+<!--                <p class="text-gray-500 leading-relaxed">集成 MediaPipe 顶级算子，在复杂光线下依然保持稳定的情感锁定。</p>-->
+<!--            </div>-->
+<!--            <div class="tech-card p-12 rounded-[2rem] space-y-4">-->
+<!--                <div class="text-yellow-500 text-4xl mb-6">🛡️</div>-->
+<!--                <h3 class="text-2xl font-bold">端到端加密</h3>-->
+<!--                <p class="text-gray-500 leading-relaxed">生物特征数据仅在内存处理，不进行云端存储，保护用户绝对隐私。</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </section>-->
+
+<!--    &lt;!&ndash; 登录注册二合一模态框 &ndash;&gt;-->
+<!--    <div id="modalOverlay" class="fixed inset-0 bg-black/90 z-[100] hidden items-center justify-center p-6 backdrop-blur-xl">-->
+<!--        <div class="modal-glass p-12 rounded-[3rem] w-full max-w-lg relative animate__animated animate__zoomIn">-->
+<!--            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition text-2xl">×</button>-->
+
+<!--            <div id="loginSection" class="space-y-8">-->
+<!--                <div>-->
+<!--                    <h2 class="text-4xl font-bold mb-2">AUTH // 登录</h2>-->
+<!--                    <p class="text-gray-500 text-sm italic tracking-widest uppercase">请输入最高权限凭证</p>-->
+<!--                </div>-->
+<!--                <form onsubmit="handleAuth(event, '/api/login')" class="space-y-6">-->
+<!--                    <input type="text" name="username" placeholder="ACCOUNT" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono">-->
+<!--                    <input type="password" name="password" placeholder="PASSWORD" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono">-->
+<!--                    <button class="w-full py-5 bg-cyan-600 rounded-xl font-bold text-white hover:bg-cyan-500 transition shadow-lg shadow-cyan-900/20 uppercase tracking-widest">-->
+<!--                        验证并初始化-->
+<!--                    </button>-->
+<!--                </form>-->
+<!--                <div class="text-center">-->
+<!--                    <button onclick="toggleAuth()" class="text-xs text-gray-500 hover:text-cyan-400 transition">没有账号? 申请注册新节点</button>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div id="regSection" class="space-y-8 hidden">-->
+<!--                <div>-->
+<!--                    <h2 class="text-4xl font-bold mb-2">JOIN // 注册</h2>-->
+<!--                    <p class="text-gray-500 text-sm italic tracking-widest uppercase">创建您的数字访问身份</p>-->
+<!--                </div>-->
+<!--                <form onsubmit="handleAuth(event, '/api/register')" class="space-y-6">-->
+<!--                    <input type="text" name="username" placeholder="NEW ACCOUNT" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono">-->
+<!--                    <input type="password" name="password" placeholder="SET PASSWORD" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono">-->
+<!--                    <button class="w-full py-5 bg-white text-black rounded-xl font-bold uppercase tracking-widest">-->
+<!--                        立即授权注册-->
+<!--                    </button>-->
+<!--                </form>-->
+<!--                <div class="text-center">-->
+<!--                    <button onclick="toggleAuth()" class="text-xs text-gray-500 hover:text-cyan-400 transition">已有账号? 返回登录</button>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        // -&#45;&#45; 交互逻辑 -&#45;&#45;-->
+<!--        function openModal() { document.getElementById('modalOverlay').classList.remove('hidden'); document.getElementById('modalOverlay').classList.add('flex'); }-->
+<!--        function closeModal() { document.getElementById('modalOverlay').classList.add('hidden'); document.getElementById('modalOverlay').classList.remove('flex'); }-->
+<!--        function toggleAuth() {-->
+<!--            document.getElementById('loginSection').classList.toggle('hidden');-->
+<!--            document.getElementById('regSection').classList.toggle('hidden');-->
+<!--        }-->
+
+<!--        async function handleAuth(event, url) {-->
+<!--            event.preventDefault();-->
+<!--            const res = await fetch(url, { method: 'POST', body: new FormData(event.target) });-->
+<!--            const data = await res.json();-->
+<!--            if (data.status === 'success') {-->
+<!--                if (data.redirect) {-->
+<!--                    Swal.fire({ title: '授权成功', text: '正在同步神经元数据...', icon: 'success', background: '#111', color: '#fff' })-->
+<!--                    .then(() => window.location.href = data.redirect);-->
+<!--                } else {-->
+<!--                    Swal.fire({ title: '注册成功', text: data.message, icon: 'success', background: '#111', color: '#fff' });-->
+<!--                    toggleAuth();-->
+<!--                }-->
+<!--            } else {-->
+<!--                Swal.fire({ title: '拒绝访问', text: data.message, icon: 'error', background: '#111', color: '#fff' });-->
+<!--            }-->
+<!--        }-->
+
+<!--        // -&#45;&#45; Canvas 粒子系统 (高级交互) -&#45;&#45;-->
+<!--        const canvas = document.getElementById('particle-canvas');-->
+<!--        const ctx = canvas.getContext('2d');-->
+<!--        let particles = [];-->
+<!--        let mouse = { x: null, y: null };-->
+
+<!--        function resize() {-->
+<!--            canvas.width = window.innerWidth;-->
+<!--            canvas.height = window.innerHeight;-->
+<!--        }-->
+
+<!--        class Particle {-->
+<!--            constructor() {-->
+<!--                this.x = Math.random() * canvas.width;-->
+<!--                this.y = Math.random() * canvas.height;-->
+<!--                this.size = Math.random() * 2 + 0.5;-->
+<!--                this.speedX = Math.random() * 0.5 - 0.25;-->
+<!--                this.speedY = Math.random() * 0.5 - 0.25;-->
+<!--            }-->
+<!--            update() {-->
+<!--                this.x += this.speedX;-->
+<!--                this.y += this.speedY;-->
+<!--                if (this.x > canvas.width) this.x = 0;-->
+<!--                if (this.x < 0) this.x = canvas.width;-->
+<!--                if (this.y > canvas.height) this.y = 0;-->
+<!--                if (this.y < 0) this.y = canvas.height;-->
+
+<!--                // 鼠标交互-->
+<!--                let dx = mouse.x - this.x;-->
+<!--                let dy = mouse.y - this.y;-->
+<!--                let distance = Math.sqrt(dx*dx + dy*dy);-->
+<!--                if (distance < 150) {-->
+<!--                    this.x -= dx/20;-->
+<!--                    this.y -= dy/20;-->
+<!--                }-->
+<!--            }-->
+<!--            draw() {-->
+<!--                ctx.fillStyle = 'rgba(6, 182, 212, 0.3)';-->
+<!--                ctx.beginPath();-->
+<!--                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);-->
+<!--                ctx.fill();-->
+<!--            }-->
+<!--        }-->
+
+<!--        function init() {-->
+<!--            particles = [];-->
+<!--            for (let i = 0; i < 100; i++) particles.push(new Particle());-->
+<!--        }-->
+
+<!--        function animate() {-->
+<!--            ctx.clearRect(0, 0, canvas.width, canvas.height);-->
+<!--            particles.forEach(p => { p.update(); p.draw(); });-->
+<!--            requestAnimationFrame(animate);-->
+<!--        }-->
+
+<!--        window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });-->
+<!--        window.addEventListener('resize', resize);-->
+<!--        resize(); init(); animate();-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
+    <!-- 原有的脚本下方添加 -->
+
+    <link rel="icon" href="/static/ai_16x16.ico" type="image/x-icon">
+    <title>FaceSense AI // 赋能情感数字化</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&display=swap');
+
+        body {
+            background-color: #000;
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow-x: hidden;
+        }
+
+        #particle-canvas {
+            position: fixed;
+            top: 0; left: 0;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glass-nav {
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(6, 182, 212, 0.2);
+            z-index: 100;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        /* --- 新增：核心架构全屏容器 --- */
+        #arch-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 200;
+            display: none;
+            perspective: 2000px;
+            overflow-y: auto;
+        }
+
+        /* 堆叠层级卡片 */
+        .layer-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(6, 182, 212, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: rotateX(25deg) translateY(50px) translateZ(0px);
+            opacity: 0;
+        }
+
+        .arch-active .layer-card {
+            transform: rotateX(0deg) translateY(0px) translateZ(50px);
+            opacity: 1;
+        }
+
+        /* 装饰线条 */
+        .data-thread {
+            position: absolute;
+            left: 50%;
+            width: 2px;
+            background: linear-gradient(to bottom, #06b6d4, transparent);
+            height: 100px;
+            transform: translateX(-50%);
+        }
+
+        .tech-card {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .tech-card:hover {
+            background: rgba(6, 182, 212, 0.05);
+            border-color: rgba(6, 182, 212, 0.5);
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+        }
+
+        .scan-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            border: 2px solid rgba(6, 182, 212, 0.3);
+            border-radius: 50%;
+            overflow: hidden;
+        }
+
+        .scan-line {
+            position: absolute;
+            width: 100%;
+            height: 4px;
+            background: #06b6d4;
+            box-shadow: 0 0 20px #06b6d4;
+            top: 0;
+            animation: scan-move 4s ease-in-out infinite;
+        }
+
+        @keyframes scan-move {
+            0%, 100% { top: 0; }
+            50% { top: 100%; }
+        }
+
+        .floating { animation: floating 6s ease-in-out infinite; }
+        @keyframes floating {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .btn-premium {
+            background: #fff;
+            color: #000;
+            font-weight: 700;
+            transition: all 0.3s ease;
+        }
+        .btn-premium:hover {
+            box-shadow: 0 0 30px rgba(6, 182, 212, 0.8);
+            transform: scale(1.05);
+        }
+
+        .modal-glass {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        /* 让 Markdown 解析后的内容在聊天框里显示正常 */
+        .markdown-body p {
+            display: inline; /* 防止自动换行破坏排版 */
+            margin: 0;
+        }
+        /* Markdown 样式微调 */
+        .markdown-body p {
+            display: inline; /* 防止段落自动换行 */
+            margin: 0;
+        }
+        .markdown-body strong {
+            color: #22d3ee; /* 加粗显示为亮青色 */
+            font-weight: 800;
+        }
+        .markdown-body br {
+            display: block;
+            margin: 4px 0;
+        }
+
+        /* 隐藏原生光标 */
+        * { cursor: none !important; }
+
+        /* 自定义光标 */
+        #custom-cursor {
+            width: 8px; height: 8px; background: #06b6d4;
+            position: fixed; pointer-events: none; border-radius: 50%; z-index: 9999;
+        }
+        #cursor-outline {
+            width: 40px; height: 40px; border: 1px solid rgba(6, 182, 212, 0.5);
+            position: fixed; pointer-events: none; border-radius: 50%; z-index: 9998;
+            transition: transform 0.15s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+        /* 当悬停在可点击元素上时的效果 */
+        .cursor-hover #cursor-outline {
+            transform: scale(1.5);
+            background: rgba(6, 182, 212, 0.1);
+            border-color: #06b6d4;
+        }
+        /* 按钮特效 */
+        .btn-premium {
+            background: #06b6d4; color: black; font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+        }
+        .btn-premium:hover { transform: translateY(-2px); box-shadow: 0 0 40px rgba(6, 182, 212, 0.6); }
+        .btn-edu {
+            background: rgba(234, 179, 8, 0.1); color: #eab308; border: 1px solid #eab308;
+            font-weight: bold; transition: all 0.3s ease;
+        }
+        .btn-edu:hover { background: #eab308; color: black; box-shadow: 0 0 30px rgba(234, 179, 8, 0.4); }
+        /* 3. 紫色：考试系统 (新) */
+        .btn-exam {
+            background: rgba(168, 85, 247, 0.1); color: #a855f7; border: 1px solid #a855f7;
+            transition: all 0.3s ease;
+        }
+        .btn-exam:hover { background: #a855f7; color: white; box-shadow: 0 0 30px rgba(168, 85, 247, 0.4); }
+    </style>
+</head>
+
+<!-- AI 助手悬浮球 -->
+<div id="ai-assistant" class="fixed bottom-8 right-8 z-[500]">
+    <!-- 悬浮球按钮 -->
+    <button onclick="toggleChat()" class="w-16 h-16 bg-cyan-600 rounded-full flex items-center justify-center shadow-[0_0_20px_#06b6d4] hover:scale-110 transition-transform duration-300 group">
+        <svg class="w-8 h-8 text-white group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+        </svg>
+        <span class="absolute -top-2 -right-2 flex h-4 w-4">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-4 w-4 bg-cyan-500"></span>
+        </span>
+    </button>
+
+    <!-- 聊天窗口 -->
+    <div id="chat-window" class="absolute bottom-20 right-0 w-80 md:w-96 h-[500px] modal-glass rounded-[2rem] shadow-2xl flex flex-col hidden animate__animated animate__fadeInUp border border-cyan-500/30">
+        <!-- 头部 -->
+        <div class="p-6 border-b border-cyan-500/20 flex justify-between items-center bg-cyan-500/10 rounded-t-[2rem]">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></div>
+                <span class="font-bold text-sm tracking-widest italic text-cyan-400">SENTIENCE // AI 助手</span>
+            </div>
+            <button onclick="toggleChat()" class="text-gray-500 hover:text-white">✕</button>
+        </div>
+
+        <!-- 消息区域 -->
+        <div id="chat-messages" class="flex-1 overflow-y-auto p-6 space-y-4 font-mono text-xs">
+            <div class="bg-cyan-500/10 p-3 rounded-xl border border-cyan-500/20">
+                <span class="text-cyan-400">[SYSTEM]:</span> 初始化成功。您好，我是 Sentience。关于 FaceSense 系统或情感计算，您有什么想了解的吗？
+            </div>
+        </div>
+
+        <!-- 输入区域 -->
+        <div class="p-4 bg-black/40 rounded-b-[2rem]">
+            <div class="relative">
+                <input id="chat-input" type="text" placeholder="输入指令..." class="w-full bg-white/5 border border-white/10 p-4 pr-12 rounded-xl outline-none focus:border-cyan-500 text-xs transition-all font-mono">
+                <button onclick="sendChatMessage()" class="absolute right-3 top-1/2 -translate-y-1/2 text-cyan-500 hover:text-white">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7" stroke-width="2"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+<body>
+
+    <div id="custom-cursor"></div>
+    <div id="cursor-outline"></div>
+    <canvas id="particle-canvas"></canvas>
+
+    <!-- 导航 -->
+    <nav class="glass-nav fixed w-full py-6 px-12 flex justify-between items-center">
+        <div class="text-2xl font-bold tracking-tighter flex items-center gap-3">
+            <div class="w-6 h-6 bg-cyan-500 rounded-sm rotate-45 shadow-[0_0_15px_#06b6d4]"></div>
+            FACESENSE <span class="text-cyan-500 font-light">// AI</span>
+        </div>
+        <div class="hidden md:flex gap-12 text-sm font-bold uppercase tracking-widest text-gray-400">
+            <a href="#features" class="hover:text-white transition">功能矩阵</a>
+            <a href="/teacher" class="hover:text-cyan-400 transition">
+                <i class="fa-solid fa-chalkboard-user mr-1"></i> 教学指挥舱
+            </a>
+            <!-- 修改点：点击触发 openArchitecture -->
+            <a href="javascript:void(0)" onclick="openArchitecture()" class="hover:text-cyan-400 transition">核心架构</a>
+            <button onclick="openModal()" class="text-cyan-500 hover:text-cyan-300">系统进入</button>
+        </div>
+    </nav>
+
+    <!-- Hero 主视觉 -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 px-8 z-10">
+        <div class="container mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-8 animate__animated animate__fadeInLeft">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full glass border border-cyan-500/30 text-xs font-bold text-cyan-400">
+                    <span class="w-2 h-2 bg-cyan-500 rounded-full animate-pulse"></span>
+                    NEURAL ENGINE V4.0 已就绪
+                </div>
+                <h1 class="text-7xl lg:text-9xl font-bold leading-none">
+                    重新定义<br><span class="hero-gradient italic">人类感知</span>
+                </h1>
+                <p class="text-gray-400 text-lg max-w-xl leading-relaxed">
+                    FaceSense 跨越了传统视觉边界，通过深度残差网络实时捕捉 468 个面部特征点。这不仅仅是识别，这是对数字情感的微秒级洞察。
+                </p>
+                <div class="flex gap-6">
+                    <button onclick="openModal()" class="btn-premium px-10 py-5 rounded-sm uppercase tracking-widest text-sm">
+                        立即启动控制台
+                    </button>
+                    <!-- 入口 B: 教学系统 (新) -->
+                    <a href="/teacher" class="btn-edu px-8 py-4 rounded text-xs uppercase tracking-widest flex items-center gap-2">
+                        <span>🎓</span> 进入教学系统
+                    </a>
+
+                    <!-- 1. 学生入口 -->
+                    <a href="/student/dashboard" class="btn-exam px-6 py-3 rounded text-xs uppercase tracking-widest flex items-center gap-2 border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-white transition">
+                        <span>📝</span> 考生入口
+                    </a>
+                    <!-- 2. 老师入口 -->
+                    <a href="/teacher/exam_builder" class="btn-exam px-6 py-3 rounded text-xs uppercase tracking-widest flex items-center gap-2 border border-purple-500 text-purple-400 hover:bg-purple-600 hover:text-white transition">
+                        <span>👨‍🏫</span> 教师入口
+                    </a>
+
+<!--                    <button onclick="openArchitecture()" class="px-10 py-5 glass border border-white/10 rounded-sm uppercase tracking-widest text-sm font-bold hover:bg-white/5 transition">-->
+<!--                        技术架构-->
+<!--                    </button>-->
+                </div>
+            </div>
+
+            <!-- 右侧：动态面部扫描模型 -->
+            <div class="hidden lg:flex justify-center items-center relative animate__animated animate__fadeInRight">
+                <div class="floating scan-container glass flex items-center justify-center">
+                    <div class="scan-line"></div>
+                    <svg width="200" height="200" viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="0.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18Z"></path>
+                        <path d="M8 10h.01"></path>
+                        <path d="M16 10h.01"></path>
+                        <path d="M9 15c.5 1 1.5 1.5 3 1.5s2.5-.5 3-1.5"></path>
+                        <path d="M12 2v2"></path><path d="M12 20v2"></path>
+                        <path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path>
+                        <path d="M2 12h2"></path><path d="M20 12h2"></path>
+                        <path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path>
+                    </svg>
+                    <div class="absolute -bottom-10 text-[10px] font-mono text-cyan-800">FACIAL_MESH_GENERATING...</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 功能区 -->
+    <section id="features" class="relative z-10 py-32 container mx-auto px-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="tech-card p-12 rounded-[2rem] space-y-4">
+                <div class="text-cyan-500 text-4xl mb-6">⚡</div>
+                <h3 class="text-2xl font-bold">极速推理</h3>
+                <p class="text-gray-500 leading-relaxed">基于 FastAPI 异步架构，单帧处理延迟低于 40ms，确保数据实时同步。</p>
+            </div>
+            <div class="tech-card p-12 rounded-[2rem] space-y-4">
+                <div class="text-purple-500 text-4xl mb-6">🎯</div>
+                <h3 class="text-2xl font-bold">亚像素精度</h3>
+                <p class="text-gray-500 leading-relaxed">集成 MediaPipe 顶级算子，在复杂光线下依然保持稳定的情感锁定。</p>
+            </div>
+            <div class="tech-card p-12 rounded-[2rem] space-y-4">
+                <div class="text-yellow-500 text-4xl mb-6">🛡️</div>
+                <h3 class="text-2xl font-bold">端到端加密</h3>
+                <p class="text-gray-500 leading-relaxed">生物特征数据仅在内存处理，不进行云端存储，保护用户绝对隐私。</p>
+            </div>
+        </div>
+    </section>
+
+
+    <section class="py-32 container mx-auto px-8 relative z-10">
+    <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold italic tracking-widest text-cyan-400">GLOBAL_EMOTION_NETWORK</h2>
+        <p class="text-gray-500 text-sm uppercase mt-2">实时感知全球 1,402 个节点的心理状态</p>
+    </div>
+
+    <!-- 3D 地球容器 -->
+    <div class="glass rounded-[3rem] h-[600px] w-full overflow-hidden relative">
+        <div id="global-globe" class="w-full h-full"></div>
+        <!-- 侧边说明 -->
+        <div class="absolute bottom-10 left-10 glass p-4 rounded-xl border border-cyan-500/20">
+            <div class="flex items-center gap-2 mb-2">
+                <span class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                <span class="text-[10px] font-bold">ACTIVE NODES: 1,402</span>
+            </div>
+            <p class="text-[9px] text-gray-500 max-w-[150px]">
+                节点通过非对称加密通道同步情感特征值，每 500ms 更新一次。
+            </p>
+        </div>
+    </div>
+    </section>
+    <!-- --- 新增：核心架构全屏界面 --- -->
+    <div id="arch-overlay">
+        <div class="max-w-4xl mx-auto py-24 px-8 relative">
+            <button onclick="closeArchitecture()" class="fixed top-12 right-12 text-4xl text-gray-500 hover:text-cyan-400 transition">×</button>
+
+            <div class="text-center mb-24">
+                <h2 class="text-5xl font-bold mb-4 italic tracking-tighter">THE CORE ARCHITECTURE</h2>
+                <p class="text-cyan-500 font-mono text-sm tracking-[0.5em]">SYSTEM STACK DECONSTRUCTION</p>
+            </div>
+
+            <!-- 架构堆叠层 -->
+            <div class="space-y-24 relative">
+                <!-- 第一层：感知层 -->
+                <div class="layer-card p-10 rounded-3xl" style="transition-delay: 0.1s;">
+                    <div class="flex flex-col md:flex-row justify-between items-start gap-8">
+                        <div class="md:w-1/2">
+                            <span class="text-[10px] font-mono text-cyan-500 border border-cyan-500/30 px-2 py-1 mb-4 inline-block">LAYER 01 // PERCEPTION</span>
+                            <h3 class="text-3xl font-bold mb-4 text-white">超高清视觉采集</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">利用 WebRTC 协议与硬件级摄像头驱动，实现 1080P/60FPS 的原始视频流输入，支持自动光线补偿与对比度自适应增强。</p>
+                        </div>
+                        <div class="md:w-1/2 bg-cyan-500/10 rounded-xl p-4 font-mono text-[10px] text-cyan-400 border border-cyan-500/20">
+                            > CAMERA_INIT: SUCCESS<br>
+                            > FPS_TARGET: 60.0<br>
+                            > ENCODING: MJPEG/H.264
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-thread"></div>
+
+                <!-- 第二层：神经引擎层 -->
+                <div class="layer-card p-10 rounded-3xl" style="transition-delay: 0.3s;">
+                    <div class="flex flex-col md:flex-row-reverse justify-between items-start gap-8">
+                        <div class="md:w-1/2">
+                            <span class="text-[10px] font-mono text-purple-500 border border-purple-500/30 px-2 py-1 mb-4 inline-block">LAYER 02 // NEURAL ENGINE</span>
+                            <h3 class="text-3xl font-bold mb-4 text-white">ResNet 深度推理</h3>
+                            <p class="text-gray-400 text-sm leading-relaxed">基于 Google MediaPipe 的拓扑识别，对 468 个面部地标进行亚像素级定位，由 DeepFace 引擎驱动的情绪残差模型进行特征向量匹配。</p>
+                        </div>
+                        <div class="md:w-1/2 bg-purple-500/10 rounded-xl p-4 font-mono text-[10px] text-purple-400 border border-purple-500/20">
+                            > MODEL: RESNET-50-EMO<br>
+                            > TENSOR_FLOW_THREAD: ENABLED<br>
+                            > INFERENCE_TIME: 32ms
+                        </div>
+                    </div>
+                </div>
+
+                <div class="data-thread" style="background: linear-gradient(to bottom, #a855f7, transparent);"></div>
+
+                <!-- 第三层：数据持久层 -->
+                <div class="layer-card p-10 rounded-3xl" style="transition-delay: 0.5s;">
+                    <div class="flex flex-col md:flex-row justify-between items-start gap-8">
+                        <div class="md:w-1/2">
+                            <span class="text-[10px] font-mono text-yellow-500 border border-yellow-500/30 px-2 py-1 mb-4 inline-block">LAYER 03 // CLOUD DATABASE</span>
+                            <h3 class="text-3xl font-bold mb-4 text-white">MySQL 云端异步同步</h3>
+                            <p class="text-gray-500 text-sm leading-relaxed">通过 SQLAlchemy ORM 框架，采用非阻塞异步线程将每秒的情感权重写入公网数据库，为管理员提供全量生命周期数据审计。</p>
+                        </div>
+                        <div class="md:w-1/2 bg-yellow-500/10 rounded-xl p-4 font-mono text-[10px] text-yellow-400 border border-yellow-500/20">
+                            > DB_LINK: SQLPUB_REMOTE<br>
+                            > SYNC_STRATEGY: ASYNC_THREAD<br>
+                            > ENCRYPTION: SHA-256
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-32 text-center">
+                <button onclick="closeArchitecture()" class="px-12 py-4 bg-cyan-600 font-bold hover:bg-cyan-500 transition shadow-[0_0_20px_rgba(6,182,212,0.5)]">
+                    返回首页
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 登录注册模态框 (保持不变) -->
+    <div id="modalOverlay" class="fixed inset-0 bg-black/90 z-[300] hidden items-center justify-center p-6 backdrop-blur-xl">
+        <div class="modal-glass p-12 rounded-[3rem] w-full max-w-lg relative animate__animated animate__zoomIn">
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-gray-500 hover:text-white transition text-2xl">×</button>
+            <div id="loginSection" class="space-y-8">
+                <h2 class="text-4xl font-bold mb-2 italic">AUTH // 登录</h2>
+                <form onsubmit="handleAuth(event, '/api/login')" class="space-y-6">
+                    <input type="text" name="username" placeholder="ACCOUNT" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono text-white">
+                    <input type="password" name="password" placeholder="PASSWORD" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono text-white">
+                    <button class="w-full py-5 bg-cyan-600 rounded-xl font-bold text-white hover:bg-cyan-500">授权进入</button>
+                </form>
+                <div class="text-center"><button onclick="toggleAuth()" class="text-xs text-gray-500 hover:text-cyan-400">没有账号? 申请新节点</button></div>
+            </div>
+            <div id="regSection" class="space-y-8 hidden">
+                <h2 class="text-4xl font-bold mb-2 italic text-cyan-400">JOIN // 注册</h2>
+                <form onsubmit="handleAuth(event, '/api/register')" class="space-y-6">
+                    <input type="text" name="username" placeholder="NEW ACCOUNT" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono text-white">
+                    <input type="password" name="password" placeholder="SET PASSWORD" required class="w-full bg-white/5 border border-white/10 p-5 rounded-xl outline-none focus:border-cyan-500 transition-all font-mono text-white">
+                    <button class="w-full py-5 bg-white text-black rounded-xl font-bold uppercase">立即授权</button>
+                </form>
+                <div class="text-center"><button onclick="toggleAuth()" class="text-xs text-gray-500 hover:text-cyan-400">已有账号? 返回登录</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="fixed bottom-0 left-0 w-full glass py-2 z-50 overflow-hidden border-t border-cyan-500/20">
+    <div id="ticker-stream" class="whitespace-nowrap flex gap-12 font-mono text-[10px] text-cyan-500/100 uppercase italic">
+        <!-- 自动生成 -->
+    </div>
+    </div>
+
+    <style>
+    @keyframes ticker {
+        0% { transform: translateX(0); }
+        100% { transform: translateX(-50%); }
+    }
+    #ticker-stream { animation: ticker 60s linear infinite; }
+    </style>
+    <script>
+        // --- 核心架构交互逻辑 ---
+        function openArchitecture() {
+            const overlay = document.getElementById('arch-overlay');
+            overlay.style.display = 'block';
+            document.body.style.overflow = 'hidden'; // 锁定主页滚动
+            setTimeout(() => {
+                overlay.classList.add('arch-active');
+            }, 10);
+        }
+
+        function closeArchitecture() {
+            const overlay = document.getElementById('arch-overlay');
+            overlay.classList.remove('arch-active');
+            document.body.style.overflow = 'auto';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+            }, 800);
+        }
+
+        // --- 登录/注册交互 ---
+        function openModal() {
+            document.getElementById('modalOverlay').classList.remove('hidden');
+            document.getElementById('modalOverlay').classList.add('flex');
+        }
+        function closeModal() {
+            document.getElementById('modalOverlay').classList.add('hidden');
+            document.getElementById('modalOverlay').classList.remove('flex');
+        }
+        function toggleAuth() {
+            document.getElementById('loginSection').classList.toggle('hidden');
+            document.getElementById('regSection').classList.toggle('hidden');
+        }
+
+        async function handleAuth(event, url) {
+            event.preventDefault();
+            const res = await fetch(url, { method: 'POST', body: new FormData(event.target) });
+            const data = await res.json();
+            if (data.status === 'success') {
+                if (data.redirect) {
+                    Swal.fire({ title: '授权成功', text: '正在同步神经元数据...', icon: 'success', background: '#111', color: '#fff' })
+                    .then(() => window.location.href = data.redirect);
+                } else {
+                    Swal.fire({ title: '注册成功', text: data.message, icon: 'success', background: '#111', color: '#fff' });
+                    toggleAuth();
+                }
+            } else {
+                Swal.fire({ title: '拒绝访问', text: data.message, icon: 'error', background: '#111', color: '#fff' });
+            }
+        }
+
+        // --- Canvas 粒子系统 ---
+        const canvas = document.getElementById('particle-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouse = { x: null, y: null };
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 0.5;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.x < 0) this.x = canvas.width;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.y < 0) this.y = canvas.height;
+
+                let dx = mouse.x - this.x;
+                let dy = mouse.y - this.y;
+                let distance = Math.sqrt(dx*dx + dy*dy);
+                if (distance < 150) {
+                    this.x -= dx/20;
+                    this.y -= dy/20;
+                }
+            }
+            draw() {
+                ctx.fillStyle = 'rgba(6, 182, 212, 0.3)';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        function init() {
+            particles = [];
+            for (let i = 0; i < 100; i++) particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animate);
+        }
+
+
+        window.addEventListener('mousemove', e => { mouse.x = e.x; mouse.y = e.y; });
+        window.addEventListener('resize', resize);
+        resize(); init(); animate();
+    // --- AI 助手交互逻辑 (修正版) ---
+        function toggleChat() {
+            const window = document.getElementById('chat-window');
+            window.classList.toggle('hidden');
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const msgContainer = document.getElementById('chat-messages');
+            const message = input.value.trim();
+
+            // 1. 如果消息为空，直接返回
+            if (!message) return;
+
+            // 2. 显示用户消息
+            msgContainer.innerHTML += `
+                <div class="text-right">
+                    <div class="bg-white/5 inline-block p-3 rounded-xl border border-white/10 text-gray-300 text-left max-w-[80%]">
+                        <span class="text-gray-500 block mb-1 text-[10px] uppercase">[USER]</span>
+                        ${message}
+                    </div>
+                </div>
+            `;
+
+            // 清空输入框并滚动到底部
+            input.value = '';
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            // 3. 显示加载中状态
+            const loadingId = 'loading-' + Date.now();
+            msgContainer.innerHTML += `
+                <div id="${loadingId}" class="bg-cyan-500/5 p-3 rounded-xl border border-cyan-500/10 animate-pulse max-w-[80%]">
+                    <span class="text-cyan-600 block mb-1 text-[10px] uppercase">[AI]</span>
+                    正在解析神经元数据...
+                </div>
+            `;
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+
+            try {
+                const formData = new FormData();
+                formData.append('message', message);
+
+                // 4. 请求后端 API
+                const res = await fetch('/api/chat', { method: 'POST', body: formData });
+                if (!res.ok) throw new Error('网络请求失败');
+                const data = await res.json();
+
+                // 5. 移除加载动画
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.remove();
+
+                if (data.status === 'success') {
+                    // --- 核心修复：使用 marked 解析 Markdown 并处理加粗 ---
+                    let parsedReply = data.reply;
+                    if (typeof marked !== 'undefined' && marked.parse) {
+                        parsedReply = marked.parse(data.reply);
+                    }
+
+                    msgContainer.innerHTML += `
+                        <div class="bg-cyan-500/10 p-3 rounded-xl border border-cyan-500/20 shadow-[0_0_10px_rgba(6,182,212,0.1)] max-w-[90%] markdown-body">
+                            <span class="text-cyan-400 block mb-1 text-[10px] font-bold uppercase tracking-widest">[AI // SENTIENCE]</span>
+                            <div class="text-gray-200 leading-relaxed">
+                                ${parsedReply}
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error(data.message);
+                }
+            } catch (err) {
+                console.error("Chat Error:", err);
+                const loadingEl = document.getElementById(loadingId);
+                if (loadingEl) loadingEl.innerHTML = `<span class="text-red-500 font-bold">[ERROR]:</span> 链路中断。原因: ${err.message}`;
+            }
+
+            // 再次确保滚动到底部
+            msgContainer.scrollTop = msgContainer.scrollHeight;
+        }
+
+        // 绑定回车键事件
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chat-input');
+            if (chatInput) {
+                chatInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter') {
+                        e.preventDefault(); // 防止换行
+                        sendChatMessage();
+                    }
+                });
+            }
+        });
+<!--        // 将此段代码直接粘在原有 script 标签的最底部（或者在 animate() 函数之后）-->
+<!--        function initGlobalGlobe() {-->
+<!--            const chartDom = document.getElementById('global-globe');-->
+<!--            if (!chartDom) return;-->
+<!--            const myChart = echarts.init(chartDom);-->
+
+<!--            // -&#45;&#45; 1. 初始化基础坐标 (固定位置，只变强度) -&#45;&#45;-->
+<!--            const baseNodes = [];-->
+<!--            for (let i = 0; i < 200; i++) {-->
+<!--                baseNodes.push([-->
+<!--                    Math.random() * 360 - 180, // 经度-->
+<!--                    Math.random() * 160 - 80   // 纬度-->
+<!--                ]);-->
+<!--            }-->
+<!--            // 添加几个固定大城市点-->
+<!--            const mainCities = [[116.46, 39.92], [121.47, 31.23], [-74.00, 40.71], [139.69, 35.68]];-->
+
+<!--            // -&#45;&#45; 2. 动态生成数据函数 -&#45;&#45;-->
+<!--            const getDynamicData = () => {-->
+<!--                const allNodes = [...baseNodes, ...mainCities];-->
+<!--                return allNodes.map(pos => {-->
+<!--                    const intensity = Math.random() * 100; // 随机强度 0-100-->
+<!--                    return {-->
+<!--                        value: [pos[0], pos[1], intensity],-->
+<!--                        itemStyle: {-->
+<!--                            // 强度越高，颜色越亮-->
+<!--                            color: intensity > 70 ? '#22d3ee' : '#0891b2',-->
+<!--                            opacity: 0.7 + (intensity / 300), // 随强度略微改变透明度-->
+<!--                            emissive: '#06b6d4'-->
+<!--                        }-->
+<!--                    };-->
+<!--                });-->
+<!--            };-->
+
+<!--            const option = {-->
+<!--                backgroundColor: 'transparent',-->
+<!--                tooltip: {-->
+<!--                    show: true,-->
+<!--                    trigger: 'item',-->
+<!--                    backgroundColor: 'rgba(2, 6, 23, 0.9)',-->
+<!--                    borderColor: '#06b6d4',-->
+<!--                    borderWidth: 1,-->
+<!--                    textStyle: { color: '#fff', fontSize: 12, fontFamily: 'monospace' },-->
+<!--                    formatter: function(params) {-->
+<!--                        return `-->
+<!--                            <div style="border-left: 3px solid #06b6d4; padding-left: 8px;">-->
+<!--                                <span style="color:#64748b; font-size:10px;">STREAMING_NODE</span><br/>-->
+<!--                                <b style="color:#06b6d4">实时强度: ${params.value[2].toFixed(1)}%</b><br/>-->
+<!--                                <span style="color:#94a3b8">坐标: ${params.value[0].toFixed(1)}, ${params.value[1].toFixed(1)}</span>-->
+<!--                            </div>-->
+<!--                        `;-->
+<!--                    }-->
+<!--                },-->
+<!--                globe: {-->
+<!--                    baseTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/world.topo.bathy.200401.jpg',-->
+<!--                    heightTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/bathymetry_bw_composite_2k.jpg',-->
+<!--                    shading: 'realistic',-->
+<!--                    realisticMaterial: { roughness: 0.8, metalness: 0.2 },-->
+<!--                    postEffect: {-->
+<!--                        enable: true,-->
+<!--                        bloom: { enable: true, intensity: 0.2 },-->
+<!--                        SSAO: { enable: true, radius: 2, intensity: 1.5 }-->
+<!--                    },-->
+<!--                    light: {-->
+<!--                        main: { intensity: 1.5, shadow: true, alpha: 40, beta: -30 },-->
+<!--                        ambient: { intensity: 0.4 }-->
+<!--                    },-->
+<!--                    viewControl: {-->
+<!--                        autoRotate: true,-->
+<!--                        autoRotateSpeed: 4,-->
+<!--                        autoRotateAfterStill: 3,-->
+<!--                        damping: 0.9,-->
+<!--                        distance: 220-->
+<!--                    }-->
+<!--                },-->
+<!--                series: [{-->
+<!--                    type: 'bar3D',-->
+<!--                    coordinateSystem: 'globe',-->
+<!--                    data: getDynamicData(),-->
+<!--                    silent: false,-->
+<!--                    barSize: 0.6,-->
+<!--                    shading: 'realistic',-->
+<!--                    minHeight: 2,-->
+<!--                    maxHeight: 35, // 稍微拉高最大高度，增强波动感-->
+<!--                    animationDurationUpdate: 400, // 关键：平滑过渡时间-->
+<!--                    emphasis: {-->
+<!--                        itemStyle: { color: '#fff', opacity: 1, emissive: '#fff' }-->
+<!--                    }-->
+<!--                }]-->
+<!--            };-->
+
+<!--            myChart.setOption(option);-->
+
+<!--            // -&#45;&#45; 3. 核心：每 500ms 更新一次数据 -&#45;&#45;-->
+<!--            setInterval(() => {-->
+<!--                myChart.setOption({-->
+<!--                    series: [{-->
+<!--                        data: getDynamicData()-->
+<!--                    }]-->
+<!--                });-->
+<!--            }, 500);-->
+
+<!--            window.addEventListener('resize', () => myChart.resize());-->
+<!--        }-->
+<!--        // 确保在 DOM 加载完成后执行-->
+<!--        document.addEventListener('DOMContentLoaded', () => {-->
+<!--            initGlobalGlobe();-->
+<!--        });-->
+
+
+<!--        const cursor = document.getElementById('custom-cursor');-->
+<!--        const outline = document.getElementById('cursor-outline');-->
+
+<!--        window.addEventListener('mousemove', (e) => {-->
+<!--            // 基础移动-->
+<!--            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });-->
+<!--            gsap.to(outline, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.2 });-->
+
+<!--            // 检测是否悬停在按钮或链接上-->
+<!--            const target = e.target;-->
+<!--            if (target.tagName === 'BUTTON' || target.tagName === 'A' || target.closest('.tech-card')) {-->
+<!--                document.body.classList.add('cursor-hover');-->
+<!--            } else {-->
+<!--                document.body.classList.remove('cursor-hover');-->
+<!--            }-->
+<!--        });-->
+
+<!--        function initTicker() {-->
+<!--        const ticker = document.getElementById('ticker-stream');-->
+<!--        const logs = [-->
+<!--            "ENCRYPTED_SIGNAL_RECEIVED", "NEURAL_NODE_0x4F2_ACTIVE", "VALENCE_FLUX_DETECTED",-->
+<!--            "SYNCING_WITH_SQLPUB_REMOTE", "RESNET_INFERENCE_COMPLETE", "STRESS_LEVEL_LOW",-->
+<!--            "BIOMETRIC_HANDSHAKE_SUCCESS", "DOUBAO_AI_CONNECTED"-->
+<!--        ];-->
+<!--        let content = "";-->
+<!--        for(let i=0; i<40; i++) {-->
+<!--            const log = logs[Math.floor(Math.random()*logs.length)];-->
+<!--            const id = Math.random().toString(16).substring(2, 6);-->
+<!--            content += `<span>[${new Date().toLocaleTimeString()}] ${log} // ID_${id}</span>`;-->
+<!--        }-->
+<!--        ticker.innerHTML = content + content; // 双倍内容实现无缝循环-->
+<!--    }-->
+<!--    initTicker();-->
+
+
+<!--                function initGlobalGlobe() {-->
+<!--            const chartDom = document.getElementById('global-globe');-->
+<!--            if (!chartDom) return;-->
+<!--            const myChart = echarts.init(chartDom);-->
+
+<!--            // 1. 初始化基础坐标-->
+<!--            const baseNodes = [];-->
+<!--            for (let i = 0; i < 150; i++) { // 数量调至 150，兼顾性能-->
+<!--                baseNodes.push([Math.random() * 360 - 180, Math.random() * 160 - 80]);-->
+<!--            }-->
+<!--            const mainCities = [[116.46, 39.92], [121.47, 31.23], [-74.00, 40.71], [139.69, 35.68]];-->
+
+<!--            const getDynamicData = () => {-->
+<!--                const allNodes = [...baseNodes, ...mainCities];-->
+<!--                return allNodes.map(pos => {-->
+<!--                    const intensity = Math.random() * 100;-->
+<!--                    return {-->
+<!--                        value: [pos[0], pos[1], intensity],-->
+<!--                        itemStyle: {-->
+<!--                            color: intensity > 70 ? '#22d3ee' : '#0891b2',-->
+<!--                            opacity: 0.8,-->
+<!--                            emissive: '#06b6d4'-->
+<!--                        }-->
+<!--                    };-->
+<!--                });-->
+<!--            };-->
+
+<!--            // 2. 初始完整配置-->
+<!--            const option = {-->
+<!--                backgroundColor: 'transparent',-->
+<!--                tooltip: {-->
+<!--                    show: true,-->
+<!--                    trigger: 'item',-->
+<!--                    backgroundColor: 'rgba(2, 6, 23, 0.9)',-->
+<!--                    borderColor: '#06b6d4',-->
+<!--                    textStyle: { color: '#fff', fontSize: 11 }-->
+<!--                },-->
+<!--                globe: {-->
+<!--                    baseTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/world.topo.bathy.200401.jpg',-->
+<!--                    heightTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/bathymetry_bw_composite_2k.jpg',-->
+<!--                    shading: 'realistic',-->
+<!--                    realisticMaterial: { roughness: 0.8, metalness: 0.2 },-->
+<!--                    postEffect: {-->
+<!--                        enable: true,-->
+<!--                        bloom: { enable: true, intensity: 0.15 } // 稍微降低强度提高性能-->
+<!--                    },-->
+<!--                    light: {-->
+<!--                        main: { intensity: 1.5, shadow: true },-->
+<!--                        ambient: { intensity: 0.5 }-->
+<!--                    },-->
+<!--                    viewControl: {-->
+<!--                        autoRotate: true,-->
+<!--                        autoRotateSpeed: 5,-->
+<!--                        // 注意：为了稳定，暂时关闭 autoRotateAfterStill，由手动逻辑控制-->
+<!--                        damping: 0.9,-->
+<!--                        distance: 220-->
+<!--                    }-->
+<!--                },-->
+<!--                series: [{-->
+<!--                    type: 'bar3D',-->
+<!--                    coordinateSystem: 'globe',-->
+<!--                    data: getDynamicData(),-->
+<!--                    barSize: 0.5,-->
+<!--                    shading: 'realistic',-->
+<!--                    minHeight: 2,-->
+<!--                    maxHeight: 30,-->
+<!--                    animationDurationUpdate: 900 // 关键：过渡时间略小于更新间隔，实现丝滑波动-->
+<!--                }]-->
+<!--            };-->
+
+<!--            myChart.setOption(option);-->
+
+<!--            // 3. 【核心修复】动态更新逻辑-->
+<!--            setInterval(() => {-->
+<!--                myChart.setOption({-->
+<!--                    // 每次更新都要显式声明 globe 的旋转配置，防止它在更新数据时被重置-->
+<!--                    globe: {-->
+<!--                        viewControl: {-->
+<!--                            autoRotate: true-->
+<!--                        }-->
+<!--                    },-->
+<!--                    series: [{-->
+<!--                        data: getDynamicData()-->
+<!--                    }]-->
+<!--                });-->
+<!--            }, 1000); // 频率改为 1秒，不仅更稳，而且看起来更像真实的数据同步-->
+
+<!--            window.addEventListener('resize', () => myChart.resize());-->
+<!--        }-->
+            function initGlobalGlobe() {
+                const chartDom = document.getElementById('global-globe');
+                if (!chartDom) return;
+                const myChart = echarts.init(chartDom);
+
+                // 1. 初始化基础坐标
+                const baseNodes = [];
+                for (let i = 0; i < 150; i++) {
+                    baseNodes.push([Math.random() * 360 - 180, Math.random() * 160 - 80]);
+                }
+                const mainCities = [[116.46, 39.92], [121.47, 31.23], [-74.00, 40.71], [139.69, 35.68]];
+
+                const getDynamicData = () => {
+                    const allNodes = [...baseNodes, ...mainCities];
+                    return allNodes.map(pos => {
+                        const intensity = Math.random() * 100;
+                        return {
+                            // 对应经度、纬度、强度值
+                            value: [pos[0], pos[1], intensity],
+                            itemStyle: {
+                                color: intensity > 70 ? '#22d3ee' : '#0891b2',
+                                opacity: 0.8,
+                                emissive: '#06b6d4'
+                            }
+                        };
+                    });
+                };
+
+                // 2. 初始配置
+                const option = {
+                    backgroundColor: 'transparent',
+                    // 【关键修复 1】：增强版 Tooltip 配置
+                    tooltip: {
+                        show: true,
+                        trigger: 'item', // 必须是 item
+                        backgroundColor: 'rgba(2, 6, 23, 0.9)',
+                        borderColor: '#06b6d4',
+                        borderWidth: 1,
+                        textStyle: { color: '#fff', fontSize: 12, fontFamily: 'monospace' },
+                        // 格式化函数：将 [lng, lat, val] 转化为卡片内容
+                        formatter: function(params) {
+                            // params.value[0] 是经度，[1] 是纬度，[2] 是随机强度
+                            const val = params.value[2].toFixed(1);
+                            return `
+                                <div style="padding: 8px; border-left: 3px solid #06b6d4;">
+                                    <p style="color: #64748b; font-size: 10px; margin-bottom: 4px; text-transform: uppercase;">Node_Status: Active</p>
+                                    <p style="color: #fff; font-size: 14px; font-weight: bold; margin-bottom: 4px;">当前强度: ${val}%</p>
+                                    <p style="color: #94a3b8; font-size: 10px;">坐标: ${params.value[0].toFixed(1)}, ${params.value[1].toFixed(1)}</p>
+                                </div>
+                            `;
+                        }
+                    },
+                    globe: {
+                        baseTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/world.topo.bathy.200401.jpg',
+                        heightTexture: 'https://fastly.jsdelivr.net/gh/apache/echarts-website@asf-site/examples/data-gl/asset/bathymetry_bw_composite_2k.jpg',
+                        shading: 'realistic',
+                        realisticMaterial: { roughness: 0.8, metalness: 0.2 },
+                        postEffect: {
+                            enable: true,
+                            bloom: { enable: true, intensity: 0.15 }
+                        },
+                        light: {
+                            main: { intensity: 1.5, shadow: true },
+                            ambient: { intensity: 0.5 }
+                        },
+                        viewControl: {
+                            autoRotate: true,
+                            autoRotateSpeed: 5,
+                            damping: 0.9,
+                            distance: 220
+                        }
+                    },
+                    series: [{
+                        type: 'bar3D',
+                        coordinateSystem: 'globe',
+                        data: getDynamicData(),
+                        // 【关键修复 2】：禁止静默，开启交互
+                        silent: false,
+                        barSize: 0.5,
+                        shading: 'realistic',
+                        minHeight: 2,
+                        maxHeight: 30,
+                        animationDurationUpdate: 900,
+                        // 鼠标移入高亮效果
+                        emphasis: {
+                            itemStyle: {
+                                color: '#fff',
+                                opacity: 1
+                            }
+                        }
+                    }]
+                };
+
+                myChart.setOption(option);
+
+                // 3. 动态更新
+                setInterval(() => {
+                    myChart.setOption({
+                        globe: {
+                            viewControl: { autoRotate: true }
+                        },
+                        series: [{
+                            data: getDynamicData()
+                        }]
+                    });
+                }, 1000);
+
+                window.addEventListener('resize', () => myChart.resize());
+            }
+        // --- 2. 底部日志跑马灯 ---
+        function initTicker() {
+            const ticker = document.getElementById('ticker-stream');
+            if (!ticker) return; // 关键：如果找不到元素，直接退出，防止报错中断脚本
+
+            const logs = [
+                "ENCRYPTED_SIGNAL_RECEIVED", "NEURAL_NODE_ACTIVE", "VALENCE_FLUX_DETECTED",
+                "SYNCING_WITH_REMOTE_SQL", "RESNET_INFERENCE_COMPLETE", "BIOMETRIC_HANDSHAKE_SUCCESS"
+            ];
+            let content = "";
+            for(let i=0; i<40; i++) {
+                const log = logs[Math.floor(Math.random()*logs.length)];
+                const id = Math.random().toString(16).substring(2, 6).toUpperCase();
+                content += `<span style="margin-right: 50px;">[${new Date().toLocaleTimeString()}] ${log} // ID_${id}</span>`;
+            }
+            ticker.innerHTML = content + content;
+        }
+
+        // --- 3. 自定义光标 ---
+        function initCursor() {
+            const cursor = document.getElementById('custom-cursor');
+            const outline = document.getElementById('cursor-outline');
+            if (!cursor || !outline) return;
+
+            window.addEventListener('mousemove', (e) => {
+                // 使用 gsap 动画
+                gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+                gsap.to(outline, { x: e.clientX - 20, y: e.clientY - 20, duration: 0.2 });
+
+                const target = e.target;
+                if (target.tagName === 'BUTTON' || target.tagName === 'A' || target.closest('.tech-card')) {
+                    document.body.classList.add('cursor-hover');
+                } else {
+                    document.body.classList.remove('cursor-hover');
+                }
+            });
+        }
+
+        // --- 所有功能统一在页面加载后启动 ---
+        document.addEventListener('DOMContentLoaded', () => {
+            initGlobalGlobe();
+            initTicker();
+            initCursor();
+        });
+    </script>
+
+</body>
+</html>

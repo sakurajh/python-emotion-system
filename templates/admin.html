@@ -1,0 +1,1295 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>FaceSense AI // 系统指挥中心</title>-->
+<!--    &lt;!&ndash; 核心库引入 &ndash;&gt;-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>-->
+
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>-->
+
+<!--    <style>-->
+<!--        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;700&display=swap');-->
+<!--        body { background: #010409; color: #c9d1d9; font-family: 'Segoe UI', 'JetBrains Mono', sans-serif; overflow: hidden; height: 100vh; }-->
+<!--        .glass { background: rgba(13, 17, 23, 0.85); border: 1px solid rgba(56, 189, 248, 0.1); backdrop-filter: blur(20px); }-->
+<!--        .neon-text { text-shadow: 0 0 10px rgba(56, 189, 248, 0.5); color: #06b6d4; }-->
+
+<!--        /* 表格样式优化 */-->
+<!--        .cyber-table th { color: #57606a; font-size: 10px; text-transform: uppercase; letter-spacing: 0.1em; padding: 12px; border-bottom: 1px solid #21262d; }-->
+<!--        .cyber-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid #21262d; }-->
+<!--        .user-row:hover { background: rgba(56, 189, 248, 0.05); }-->
+
+<!--        /* 隐藏滚动条但保留功能 */-->
+<!--        .no-scrollbar::-webkit-scrollbar { width: 4px; }-->
+<!--        .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.2); border-radius: 10px; }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="p-4 flex flex-col gap-4">-->
+
+<!--    &lt;!&ndash; 顶栏：NOC 状态 &ndash;&gt;-->
+<!--    <header class="glass p-4 rounded-2xl flex justify-between items-center border-b-2 border-cyan-500/30">-->
+<!--        <div class="flex items-center gap-6">-->
+<!--            <div class="flex items-center gap-2">-->
+<!--                <div class="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_15px_#06b6d4]"></div>-->
+<!--                <h1 class="text-xl font-black tracking-widest italic text-white uppercase">Admin_Matrix // 系统总控</h1>-->
+<!--            </div>-->
+<!--            <div class="text-[10px] text-slate-500 uppercase tracking-[0.2em]">运行时间: <span id="uptime-clock" class="text-cyan-400 font-bold">00:00:00</span></div>-->
+<!--        </div>-->
+<!--        <div class="flex items-center gap-6">-->
+<!--            <button onclick="startVoiceBriefing()" class="text-[10px] bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400 hover:bg-cyan-500/20 transition">🔊 AI 语音简报</button>-->
+<!--            <button onclick="adminLogout()" class="bg-red-900/20 text-red-500 px-6 py-1.5 rounded-xl border border-red-900/30 font-bold text-xs uppercase hover:bg-red-500 hover:text-white transition">退出授权</button>-->
+<!--        </div>-->
+<!--    </header>-->
+
+<!--    <div class="grid grid-cols-12 gap-4 flex-1 min-h-0">-->
+
+<!--        &lt;!&ndash; 左侧：全球节点地图 + 审计日志 &ndash;&gt;-->
+<!--        <div class="col-span-3 flex flex-col gap-4 min-h-0">-->
+<!--            <div class="glass rounded-[2rem] p-4 h-[60%] flex flex-col relative overflow-hidden">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Global_Node_Map // 全球节点</h3>-->
+<!--                <div id="noc-map" class="flex-1 w-full"></div>-->
+<!--            </div>-->
+<!--            <div class="glass rounded-[2rem] p-5 h-[40%] flex flex-col overflow-hidden">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Live_Audit_Logs // 实时审计</h3>-->
+<!--                <div id="admin-logs" class="flex-1 overflow-y-auto space-y-2 text-[9px] font-mono text-cyan-500/60 no-scrollbar"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 中间：核心用户管理 &ndash;&gt;-->
+<!--        <div class="col-span-6 glass rounded-[2.5rem] p-8 flex flex-col min-h-0 relative">-->
+<!--            <div class="flex justify-between items-center mb-8">-->
+<!--                <h2 class="text-xl font-bold text-white flex items-center gap-3">-->
+<!--                    <span class="w-1.5 h-6 bg-cyan-500 rounded-full"></span> 数据库权限矩阵-->
+<!--                </h2>-->
+<!--                <button onclick="exportReport()" class="text-[10px] text-cyan-500 border border-cyan-500/20 px-4 py-2 rounded-full hover:bg-cyan-500/10 transition">导出全站报表 (.CSV)</button>-->
+<!--            </div>-->
+<!--            <div class="flex-1 overflow-y-auto pr-2 no-scrollbar">-->
+<!--                <table class="w-full text-left cyber-table">-->
+<!--                    <thead>-->
+<!--                        <tr>-->
+<!--                            <th>用户标识</th>-->
+<!--                            <th>注册日期</th>-->
+<!--                            <th>访问频次</th>-->
+<!--                            <th>操作矩阵</th>-->
+<!--                        </tr>-->
+<!--                    </thead>-->
+<!--                    <tbody id="user-table-body">-->
+<!--                        &lt;!&ndash; 由 JavaScript 动态填充 &ndash;&gt;-->
+<!--                    </tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 右侧：全局统计 + 健康监测 &ndash;&gt;-->
+<!--        <div class="col-span-3 flex flex-col gap-4 min-h-0">-->
+<!--            <div class="glass rounded-[2rem] p-6 h-[45%] flex flex-col">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-6 font-bold tracking-widest uppercase text-center">全站情绪倾向分布</h3>-->
+<!--                <div id="global-pie-chart" class="flex-1"></div>-->
+<!--            </div>-->
+
+<!--            <div class="glass rounded-[2rem] p-6 h-[30%] flex flex-col gap-4">-->
+<!--                <h3 class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Health // 健康指标</h3>-->
+<!--                <div class="space-y-4">-->
+<!--                    <div>-->
+<!--                        <div class="flex justify-between text-[10px] mb-2 text-slate-400"><span>CPU_LOAD</span><span id="stat-load">0%</span></div>-->
+<!--                        <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div id="load-bar" class="h-full bg-cyan-500 transition-all duration-1000" style="width: 0%"></div></div>-->
+<!--                    </div>-->
+<!--                    <div class="grid grid-cols-2 gap-4">-->
+<!--                        <div class="bg-white/5 p-3 rounded-xl border border-white/5">-->
+<!--                            <p class="text-[9px] text-gray-500">异常拦截</p>-->
+<!--                            <p id="stat-intercepts" class="text-lg font-bold text-red-500 font-mono">0</p>-->
+<!--                        </div>-->
+<!--                        <div class="bg-white/5 p-3 rounded-xl border border-white/5">-->
+<!--                            <p class="text-[9px] text-gray-500">活跃节点</p>-->
+<!--                            <p id="stat-nodes" class="text-lg font-bold text-green-500 font-mono">0</p>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="bg-cyan-500/10 rounded-[2rem] border border-cyan-500/20 p-6 h-[25%] flex flex-col justify-center text-center">-->
+<!--                <h4 class="text-cyan-400 font-bold text-xs mb-2">AI_COMMAND_BOT</h4>-->
+<!--                <p id="ai-status" class="text-[10px] text-cyan-200/50 leading-relaxed italic">"系统正在全量扫描识别链路，当前无异常波动..."</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 用户详情 Modal &ndash;&gt;-->
+<!--    <div id="analysisModal" class="fixed inset-0 bg-black/95 hidden z-[1000] items-center justify-center p-8 backdrop-blur-md">-->
+<!--        <div class="glass p-10 rounded-[3rem] w-full max-w-6xl relative border border-cyan-500/30 shadow-2xl">-->
+<!--            <button onclick="closeModal()" class="absolute top-8 right-8 text-2xl text-gray-500 hover:text-white transition">×</button>-->
+<!--            <h2 id="modalUserTitle" class="text-2xl font-bold mb-10 italic text-cyan-400 uppercase tracking-tighter">User_Bio_Audit // 用户深度审计</h2>-->
+
+<!--            <div class="grid grid-cols-2 gap-10">-->
+<!--                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col">-->
+<!--                    <h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">情感分布比例矩阵</h3>-->
+<!--                    <div id="user-pie-chart" class="w-full h-full"></div>-->
+<!--                </div>-->
+<!--                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col">-->
+<!--                    <h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">近期情绪演变时间轴</h3>-->
+<!--                    <div id="user-trend-chart" class="w-full h-full"></div>-->
+<!--                </div>-->
+<!--            </div>-->
+
+<!--            <div class="mt-8 flex justify-between items-center p-6 bg-cyan-600/5 rounded-2xl border border-cyan-500/20">-->
+<!--                <div>-->
+<!--                    <h4 class="text-white font-bold tracking-widest text-sm">DIGITAL_DNA // 数字身份凭证</h4>-->
+<!--                    <p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">根据情感权重向量生成唯一视觉指纹</p>-->
+<!--                </div>-->
+<!--                <button onclick="generateDigitalID()" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-900/40 uppercase">生成并导出 PNG</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 隐藏的名片渲染模版 &ndash;&gt;-->
+<!--    <div id="id-card-template" style="position: fixed; left: -9999px;">-->
+<!--        <div id="actual-card" class="w-[500px] h-[300px] bg-[#020617] p-8 relative overflow-hidden flex flex-col justify-between" style="border: 2px solid #06b6d4;">-->
+<!--            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 0); background-size: 20px 20px;"></div>-->
+<!--            <div class="flex justify-between items-start z-10">-->
+<!--                <div>-->
+<!--                    <h1 class="text-white font-black italic text-2xl tracking-tighter">FACESENSE AI</h1>-->
+<!--                    <p class="text-cyan-500 font-mono text-[8px] tracking-[0.4em]">AUTHENTICATED_BIOMETRIC_ID</p>-->
+<!--                </div>-->
+<!--                <div class="w-12 h-12 border border-cyan-500/30 flex items-center justify-center text-[10px] text-cyan-500 font-bold">AI_ID</div>-->
+<!--            </div>-->
+<!--            <div class="z-10 flex gap-6 items-center">-->
+<!--                <div class="w-20 h-20 rounded-full border-2 border-dashed border-cyan-500 flex items-center justify-center">-->
+<!--                    <span id="card-icon" class="text-3xl">👤</span>-->
+<!--                </div>-->
+<!--                <div class="space-y-1">-->
+<!--                    <p class="text-gray-500 text-[10px] uppercase font-bold">Subject ID</p>-->
+<!--                    <p id="card-username" class="text-white font-mono text-xl">NULL_NODE</p>-->
+<!--                    <div class="flex gap-2 mt-2">-->
+<!--                        <span id="card-tag" class="px-2 py-0.5 bg-cyan-500 text-black text-[9px] font-bold rounded">TOP_EMO</span>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="z-10 border-t border-white/10 pt-4 flex justify-between items-end">-->
+<!--                <div class="font-mono text-[8px] text-gray-600">HASH: <span id="card-hash">0x...</span><br>GEN: <span id="card-date">2025/12/28</span></div>-->
+<!--                <div class="text-cyan-500 font-bold text-[10px] italic">Verified by Neural Engine</div>-->
+<!--            </div>-->
+<!--            <div class="absolute right-0 top-0 h-full w-1 bg-cyan-500 shadow-[0_0_15px_#06b6d4]"></div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    <script>-->
+<!--        // -&#45;&#45; 初始化全局图表 -&#45;&#45;-->
+<!--        let nocMap = null;-->
+<!--        const globalPie = echarts.init(document.getElementById('global-pie-chart'));-->
+<!--        const userPie = echarts.init(document.getElementById('user-pie-chart'));-->
+<!--        const userTrend = echarts.init(document.getElementById('user-trend-chart'));-->
+
+<!--        let serverStartTime = 0;-->
+<!--        let currentAnalysisUser = "";-->
+<!--        let currentAnalysisData = null;-->
+
+<!--        // 1. 初始化地图-->
+<!--        function updateMap(nodes) {-->
+<!--            // 1. 设置中心控制塔坐标 (北京)-->
+<!--            if (!nocMap || !nodes) return;-->
+<!--            const centerPoint = [116.40, 39.90];-->
+
+<!--            // 2. 构造飞线数据：从节点 -> 中心-->
+<!--            const linesData = nodes.map(node => ({-->
+<!--                fromName: node.name,-->
+<!--                toName: 'CENTER',-->
+<!--                coords: [-->
+<!--                    node.value.slice(0, 2), // 起点 [lng, lat]-->
+<!--                    centerPoint             // 终点 [lng, lat]-->
+<!--                ]-->
+<!--            }));-->
+
+<!--            nocMap.setOption({-->
+<!--                backgroundColor: 'transparent',-->
+<!--                geo: {-->
+<!--                    map: 'world',-->
+<!--                    roam: true, // 允许缩放平移-->
+<!--                    label: { show: false },-->
+<!--                    itemStyle: {-->
+<!--                        areaColor: 'rgba(6, 182, 212, 0.05)', // 陆地颜色-->
+<!--                        borderColor: 'rgba(6, 182, 212, 0.2)'  // 边界颜色-->
+<!--                    },-->
+<!--                    emphasis: {-->
+<!--                        itemStyle: { areaColor: 'rgba(6, 182, 212, 0.1)' }-->
+<!--                    }-->
+<!--                },-->
+<!--                series: [-->
+<!--                    // 第一层：呼吸点 (保持不变)-->
+<!--                    {-->
+<!--                        type: 'effectScatter',-->
+<!--                        // ... (略) ...-->
+<!--                    },-->
+<!--                    // 第二层：动态飞线 (请把这一段改成下面这样)-->
+<!--                    {-->
+<!--                        type: 'lines',-->
+<!--                        coordinateSystem: 'geo',-->
+<!--                        zlevel: 2,-->
+<!--                        effect: {-->
+<!--                            show: true,-->
+<!--                            period: 2,       // 【关键修改】改为 2 (数字越小飞得越快！)-->
+<!--                            trailLength: 0.7, // 【关键修改】改为 0.7 (尾巴拖得更长)-->
+<!--                            color: '#00f6ff', // 【可选】改成更亮的青色-->
+<!--                            symbol: 'arrow',  // 【新增】加上箭头-->
+<!--                            symbolSize: 5     // 【新增】箭头大小-->
+<!--                        },-->
+<!--                        lineStyle: {-->
+<!--                            color: '#06b6d4',-->
+<!--                            width: 1.5,       // 线稍微变粗一点-->
+<!--                            opacity: 0.4,     // 稍微亮一点-->
+<!--                            curveness: 0.2    // 弯曲度-->
+<!--                        },-->
+<!--                        data: linesData-->
+<!--                    }-->
+<!--                ]-->
+<!--            });-->
+<!--        }-->
+
+<!--        // 2. 核心：拉取数据-->
+<!--        async function fetchAdminData() {-->
+<!--            try {-->
+<!--                const res = await fetch('/api/admin/stats');-->
+<!--                const data = await res.json();-->
+
+<!--                // 更新系统状态-->
+<!--                document.getElementById('stat-load').innerText = data.system_load + "%";-->
+<!--                document.getElementById('load-bar').style.width = data.system_load + "%";-->
+<!--                document.getElementById('stat-nodes').innerText = data.active_nodes;-->
+<!--                document.getElementById('stat-intercepts').innerText = data.interceptions || 0;-->
+<!--                serverStartTime = data.start_time;-->
+
+<!--                // 更新地图-->
+<!--                updateMap(data.geo_nodes || []);-->
+
+<!--                // 更新全站饼图-->
+<!--                const pieData = Object.keys(data.global_emotions).map(k => ({name: k, value: data.global_emotions[k]}));-->
+<!--                globalPie.setOption({-->
+<!--                    tooltip: { trigger: 'item' },-->
+<!--                    series: [{ type: 'pie', radius: ['40%', '70%'], data: pieData, itemStyle: {borderRadius: 8, borderColor: '#010409', borderWidth: 2}, label: {show: false} }]-->
+<!--                });-->
+
+<!--                // 刷新用户列表 ( fetchUsers 逻辑整合 )-->
+<!--                updateTable(data.user_data);-->
+
+<!--                // 生成假日志-->
+<!--                const actions = ["ACCESS_GRANTED", "SYNC_COMPLETE", "NODE_ACTIVE", "ENCRYPT_IDLE"];-->
+<!--                const logBox = document.getElementById('admin-logs');-->
+<!--                const log = document.createElement('div');-->
+<!--                log.innerHTML = `<span class="text-slate-500">[${new Date().toLocaleTimeString()}]</span> ${actions[Math.floor(Math.random()*actions.length)]} // ID:${Math.floor(Math.random()*999)}`;-->
+<!--                logBox.prepend(log);-->
+<!--                if(logBox.children.length > 20) logBox.lastChild.remove();-->
+
+<!--            } catch (e) { console.error("Sync Error:", e); }-->
+<!--        }-->
+
+<!--        function updateTable(users) {-->
+<!--            const tbody = document.getElementById('user-table-body');-->
+<!--            tbody.innerHTML = "";-->
+<!--            users.forEach(u => {-->
+<!--                tbody.innerHTML += `-->
+<!--                    <tr class="user-row transition">-->
+<!--                        <td class="py-4 font-bold text-cyan-400 font-mono">${u.username}</td>-->
+<!--                        <td class="py-4 text-xs text-slate-500">${u.reg_time}</td>-->
+<!--                        <td class="py-4 font-mono">${u.logins}次</td>-->
+<!--                        <td class="py-4 space-x-4">-->
+<!--                            <button onclick="analyzeUser('${u.username}')" class="text-xs text-blue-400 underline">详情分析</button>-->
+<!--                            <button onclick="handleAction('${u.username}', 'delete')" class="text-xs text-red-900 underline opacity-30 hover:opacity-100 transition">抹除</button>-->
+<!--                        </td>-->
+<!--                    </tr>`;-->
+<!--            });-->
+<!--        }-->
+
+<!--        // 3. 用户深度审计 (修正后的大图表版)-->
+<!--        async function analyzeUser(username) {-->
+<!--            currentAnalysisUser = username;-->
+<!--            document.getElementById('analysisModal').classList.replace('hidden', 'flex');-->
+<!--            document.getElementById('modalUserTitle').innerText = `正在读取 [ ${username} ] 的云端特征...`;-->
+
+<!--            const res = await fetch(`/api/admin/user_analysis/${username}`);-->
+<!--            const data = await res.json();-->
+<!--            currentAnalysisData = data;-->
+
+<!--            // 渲染饼图-->
+<!--            userPie.setOption({-->
+<!--                series: [{ type: 'pie', data: Object.keys(data.pie).map(k => ({name: k, value: data.pie[k]})), radius: ['35%', '65%'], itemStyle: {borderRadius: 10} }]-->
+<!--            });-->
+
+<!--            // 渲染趋势图-->
+<!--            userTrend.setOption({-->
+<!--                xAxis: { type: 'category', data: data.trend.map(t => t.time), axisLabel: {color: '#555'} },-->
+<!--                yAxis: { type: 'category', data: ["平静", "喜悦", "惊讶", "忧伤", "愤怒", "恐惧", "厌恶"], axisLabel: {color: '#555'} },-->
+<!--                series: [{ type: 'line', data: data.trend.map(t => t.emo), smooth: true, itemStyle: {color: '#06b6d4'}, areaStyle: {color: 'rgba(6,182,212,0.1)'} }]-->
+<!--            });-->
+
+<!--            // 强制 Resize 解决压缩问题-->
+<!--            setTimeout(() => { userPie.resize(); userTrend.resize(); }, 150);-->
+<!--        }-->
+
+<!--        // 4. 数字 DNA 导出-->
+<!--        async function generateDigitalID() {-->
+<!--            if(!currentAnalysisData) return;-->
+<!--            // 计算主导表情-->
+<!--            const pieRaw = currentAnalysisData.pie;-->
+<!--            let topEmo = "平静"; let maxV = -1;-->
+<!--            for(let k in pieRaw) { if(pieRaw[k] > maxV) { maxV = pieRaw[k]; topEmo = k; } }-->
+
+<!--            document.getElementById('card-username').innerText = currentAnalysisUser.toUpperCase();-->
+<!--            document.getElementById('card-tag').innerText = `主导特征: ${topEmo}`;-->
+<!--            document.getElementById('card-date').innerText = new Date().toLocaleDateString();-->
+<!--            document.getElementById('card-hash').innerText = '0x' + Math.random().toString(16).substr(2, 10).toUpperCase();-->
+<!--            const icons = {"喜悦":"😊","忧伤":"😢","愤怒":"😠","平静":"😐","惊讶":"😲","恐惧":"😨","厌恶":"🤢"};-->
+<!--            document.getElementById('card-icon').innerText = icons[topEmo] || "👤";-->
+
+<!--            const canvas = await html2canvas(document.getElementById('actual-card'), { backgroundColor: null, scale: 3 });-->
+<!--            const link = document.createElement('a');-->
+<!--            link.download = `DNA_ID_${currentAnalysisUser}.png`;-->
+<!--            link.href = canvas.toDataURL('image/png');-->
+<!--            link.click();-->
+<!--            Swal.fire({ icon: 'success', title: '数字画像已导出', background: '#020617', color: '#fff' });-->
+<!--        }-->
+
+<!--        // 5. 语音播报-->
+<!--        function startVoiceBriefing() {-->
+<!--            const text = `身份验证成功。当前全站活跃节点 ${document.getElementById('stat-nodes').innerText} 个。全量识别链路运行平稳。`;-->
+<!--            const speech = new SpeechSynthesisUtterance(text);-->
+<!--            speech.lang = 'zh-CN'; speech.rate = 0.9;-->
+<!--            window.speechSynthesis.speak(speech);-->
+<!--            Swal.fire({ title: 'AI 简报播报中', text: 'Sentience 正在汇总系统快照...', icon: 'info', background: '#020617', color: '#fff' });-->
+<!--        }-->
+
+<!--        // 其他功能-->
+<!--        function adminLogout() {-->
+<!--            Swal.fire({ title: '注销权限?', text: "系统将安全终止当前的审计会话。", icon: 'warning', showCancelButton: true, confirmButtonText: '立即退出', background: '#020617', color: '#fff' })-->
+<!--            .then((r) => { if(r.isConfirmed) window.location.href = '/'; });-->
+<!--        }-->
+
+<!--        function closeModal() { document.getElementById('analysisModal').classList.replace('flex', 'hidden'); }-->
+
+<!--        // 计时器逻辑-->
+<!--        setInterval(() => {-->
+<!--            if(serverStartTime === 0) return;-->
+<!--            let d = Math.floor(Date.now()/1000 - serverStartTime);-->
+<!--            let h = Math.floor(d/3600).toString().padStart(2,'0');-->
+<!--            let m = Math.floor((d%3600)/60).toString().padStart(2,'0');-->
+<!--            let s = (d%60).toString().padStart(2,'0');-->
+<!--            document.getElementById('uptime-clock').innerText = `${h}:${m}:${s}`;-->
+<!--        }, 1000);-->
+
+
+<!--        // ==========================================-->
+<!--        // 🚀 最终完成版：读取本地地图-->
+<!--        // ==========================================-->
+<!--        // ==========================================-->
+<!--        // 🚀 修复版启动逻辑：严格控制初始化顺序-->
+<!--        // ==========================================-->
+<!--        async function initSystem() {-->
+<!--            try {-->
+<!--                const chartDom = document.getElementById('noc-map');-->
+
+<!--                // 1. 显示加载状态-->
+<!--                if(chartDom) {-->
+<!--                    chartDom.innerHTML = '<div class="flex h-full items-center justify-center text-cyan-500 animate-pulse">正在装载地理数据...</div>';-->
+<!--                }-->
+
+<!--                console.log("正在加载本地地图数据...");-->
+
+<!--                // 2. 加载本地文件-->
+<!--                const mapUrl = '/static/world.json';-->
+<!--                const mapRes = await fetch(mapUrl);-->
+
+<!--                if (!mapRes.ok) throw new Error(`本地文件读取失败: ${mapRes.status}`);-->
+
+<!--                const mapJson = await mapRes.json();-->
+
+<!--                // 3. 检查数据有效性-->
+<!--                if (!mapJson.features || mapJson.features.length === 0) {-->
+<!--                    throw new Error("地图数据无效：缺少 features 字段");-->
+<!--                }-->
+
+<!--                // 4. 注册地图 (这一步必须在 echarts.init 之前成功)-->
+<!--                echarts.registerMap('world', mapJson);-->
+<!--                console.log(`地图注册成功！`);-->
+
+<!--                // 5. 【核心修复】地图注册好了，现在才初始化图表-->
+<!--                if(chartDom) chartDom.innerHTML = ''; // 清空加载文字-->
+
+<!--                // 如果旧实例存在，先销毁，防止缓存报错-->
+<!--                if (nocMap != null && nocMap != "" && nocMap != undefined) {-->
+<!--                    echarts.dispose(nocMap);-->
+<!--                }-->
+
+<!--                // 正式初始化-->
+<!--                nocMap = echarts.init(chartDom);-->
+
+<!--                // 6. 一切准备就绪，开始拉取后端数据-->
+<!--                await fetchAdminData();-->
+
+<!--                // 启动定时器-->
+<!--                setInterval(fetchAdminData, 5000);-->
+
+<!--                // 绑定窗口调整-->
+<!--                window.addEventListener('resize', () => {-->
+<!--                    if (nocMap) nocMap.resize();-->
+<!--                    globalPie.resize();-->
+<!--                    if(typeof userPie !== 'undefined') userPie.resize();-->
+<!--                    if(typeof userTrend !== 'undefined') userTrend.resize();-->
+<!--                });-->
+
+<!--            } catch (e) {-->
+<!--                console.error("启动失败:", e);-->
+<!--                Swal.fire({-->
+<!--                    icon: 'error',-->
+<!--                    title: '初始化失败',-->
+<!--                    text: e.message,-->
+<!--                    background: '#020617',-->
+<!--                    color: '#fff'-->
+<!--                });-->
+<!--            }-->
+<!--        }-->
+
+<!--        // 执行启动-->
+<!--        initSystem();-->
+<!--        // 启动-->
+<!--        fetchAdminData();-->
+<!--        setInterval(fetchAdminData, 5000);-->
+<!--        window.onresize = () => { nocMap.resize(); globalPie.resize(); };-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+
+<!--<!DOCTYPE html>-->
+<!--<html lang="zh">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>FaceSense AI // 系统指挥中心</title>-->
+<!--    &lt;!&ndash; 1. 引入 Tailwind CSS &ndash;&gt;-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+
+<!--    &lt;!&ndash; 2. 引入 ECharts 核心 &ndash;&gt;-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>-->
+
+<!--    &lt;!&ndash; 3. 引入工具库 &ndash;&gt;-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>-->
+
+<!--    <style>-->
+<!--        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;700&display=swap');-->
+<!--        body { background: #010409; color: #c9d1d9; font-family: 'Segoe UI', 'JetBrains Mono', sans-serif; overflow: hidden; height: 100vh; }-->
+<!--        .glass { background: rgba(13, 17, 23, 0.85); border: 1px solid rgba(56, 189, 248, 0.1); backdrop-filter: blur(20px); }-->
+<!--        .no-scrollbar::-webkit-scrollbar { width: 4px; }-->
+<!--        .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.2); border-radius: 10px; }-->
+
+<!--        /* 表格样式 */-->
+<!--        .cyber-table th { color: #57606a; font-size: 10px; uppercase; letter-spacing: 0.1em; padding: 12px; border-bottom: 1px solid #21262d; }-->
+<!--        .cyber-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid #21262d; }-->
+<!--        .user-row:hover { background: rgba(56, 189, 248, 0.05); }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body class="p-4 flex flex-col gap-4">-->
+
+<!--    &lt;!&ndash; 顶栏 &ndash;&gt;-->
+<!--    <header class="glass p-4 rounded-2xl flex justify-between items-center border-b-2 border-cyan-500/30">-->
+<!--        <div class="flex items-center gap-6">-->
+<!--            <div class="flex items-center gap-2">-->
+<!--                <div class="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_15px_#06b6d4]"></div>-->
+<!--                <h1 class="text-xl font-black tracking-widest italic text-white uppercase">Admin_Matrix // 系统总控</h1>-->
+<!--            </div>-->
+<!--            <div class="text-[10px] text-slate-500 uppercase tracking-[0.2em]">运行时间: <span id="uptime-clock" class="text-cyan-400 font-bold">00:00:00</span></div>-->
+<!--        </div>-->
+<!--        <div class="flex items-center gap-6">-->
+<!--            <button onclick="startVoiceBriefing()" class="text-[10px] bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400 hover:bg-cyan-500/20 transition">🔊 AI 语音简报</button>-->
+<!--            <button onclick="adminLogout()" class="bg-red-900/20 text-red-500 px-6 py-1.5 rounded-xl border border-red-900/30 font-bold text-xs uppercase hover:bg-red-500 hover:text-white transition">退出授权</button>-->
+<!--        </div>-->
+<!--    </header>-->
+
+<!--    &lt;!&ndash; 主布局 &ndash;&gt;-->
+<!--    <div class="grid grid-cols-12 gap-4 flex-1 min-h-0">-->
+
+<!--        &lt;!&ndash; 左侧：地图 &ndash;&gt;-->
+<!--        <div class="col-span-3 flex flex-col gap-4 min-h-0">-->
+<!--            <div class="glass rounded-[2rem] p-4 h-[60%] flex flex-col relative overflow-hidden">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Global_Node_Map // 全球节点</h3>-->
+<!--                &lt;!&ndash; 地图容器 &ndash;&gt;-->
+<!--                <div id="noc-map" class="flex-1 w-full"></div>-->
+<!--            </div>-->
+<!--            <div class="glass rounded-[2rem] p-5 h-[40%] flex flex-col overflow-hidden">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Live_Audit_Logs // 实时审计</h3>-->
+<!--                <div id="admin-logs" class="flex-1 overflow-y-auto space-y-2 text-[9px] font-mono text-cyan-500/60 no-scrollbar"></div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 中间：表格 &ndash;&gt;-->
+<!--        <div class="col-span-6 glass rounded-[2.5rem] p-8 flex flex-col min-h-0 relative">-->
+<!--            <div class="flex justify-between items-center mb-8">-->
+<!--                <h2 class="text-xl font-bold text-white flex items-center gap-3">-->
+<!--                    <span class="w-1.5 h-6 bg-cyan-500 rounded-full"></span> 数据库权限矩阵-->
+<!--                </h2>-->
+<!--                <button onclick="exportReport()" class="text-[10px] text-cyan-500 border border-cyan-500/20 px-4 py-2 rounded-full hover:bg-cyan-500/10 transition">导出全站报表 (.CSV)</button>-->
+<!--            </div>-->
+<!--            <div class="flex-1 overflow-y-auto pr-2 no-scrollbar">-->
+<!--                <table class="w-full text-left cyber-table">-->
+<!--                    <thead><tr><th>用户标识</th><th>注册日期</th><th>访问频次</th><th>操作矩阵</th></tr></thead>-->
+<!--                    <tbody id="user-table-body"></tbody>-->
+<!--                </table>-->
+<!--            </div>-->
+<!--        </div>-->
+
+<!--        &lt;!&ndash; 右侧：图表 &ndash;&gt;-->
+<!--        <div class="col-span-3 flex flex-col gap-4 min-h-0">-->
+<!--            <div class="glass rounded-[2rem] p-6 h-[45%] flex flex-col">-->
+<!--                <h3 class="text-[10px] text-slate-500 mb-6 font-bold tracking-widest uppercase text-center">全站情绪倾向分布</h3>-->
+<!--                <div id="global-pie-chart" class="flex-1"></div>-->
+<!--            </div>-->
+<!--            <div class="glass rounded-[2rem] p-6 h-[30%] flex flex-col gap-4">-->
+<!--                <h3 class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Health // 健康指标</h3>-->
+<!--                <div class="space-y-4">-->
+<!--                    <div>-->
+<!--                        <div class="flex justify-between text-[10px] mb-2 text-slate-400"><span>CPU_LOAD</span><span id="stat-load">0%</span></div>-->
+<!--                        <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div id="load-bar" class="h-full bg-cyan-500 transition-all duration-1000" style="width: 0%"></div></div>-->
+<!--                    </div>-->
+<!--                    <div class="grid grid-cols-2 gap-4">-->
+<!--                        <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">异常拦截</p><p id="stat-intercepts" class="text-lg font-bold text-red-500 font-mono">0</p></div>-->
+<!--                        <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">活跃节点</p><p id="stat-nodes" class="text-lg font-bold text-green-500 font-mono">0</p></div>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--            <div class="bg-cyan-500/10 rounded-[2rem] border border-cyan-500/20 p-6 h-[25%] flex flex-col justify-center text-center">-->
+<!--                <h4 class="text-cyan-400 font-bold text-xs mb-2">AI_COMMAND_BOT</h4>-->
+<!--                <p id="ai-status" class="text-[10px] text-cyan-200/50 leading-relaxed italic">"系统正在全量扫描识别链路，当前无异常波动..."</p>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 用户详情 Modal &ndash;&gt;-->
+<!--    <div id="analysisModal" class="fixed inset-0 bg-black/95 hidden z-[1000] items-center justify-center p-8 backdrop-blur-md">-->
+<!--        <div class="glass p-10 rounded-[3rem] w-full max-w-6xl relative border border-cyan-500/30 shadow-2xl">-->
+<!--            <button onclick="closeModal()" class="absolute top-8 right-8 text-2xl text-gray-500 hover:text-white transition">×</button>-->
+<!--            <h2 id="modalUserTitle" class="text-2xl font-bold mb-10 italic text-cyan-400 uppercase tracking-tighter">User_Bio_Audit // 用户深度审计</h2>-->
+<!--            <div class="grid grid-cols-2 gap-10">-->
+<!--                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col"><h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">情感分布比例矩阵</h3><div id="user-pie-chart" class="w-full h-full"></div></div>-->
+<!--                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col"><h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">近期情绪演变时间轴</h3><div id="user-trend-chart" class="w-full h-full"></div></div>-->
+<!--            </div>-->
+<!--            <div class="mt-8 flex justify-between items-center p-6 bg-cyan-600/5 rounded-2xl border border-cyan-500/20">-->
+<!--                <div><h4 class="text-white font-bold tracking-widest text-sm">DIGITAL_DNA // 数字身份凭证</h4><p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">根据情感权重向量生成唯一视觉指纹</p></div>-->
+<!--                <button onclick="generateDigitalID()" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-900/40 uppercase">生成并导出 PNG</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 名片模版 &ndash;&gt;-->
+<!--    <div id="id-card-template" style="position: fixed; left: -9999px;">-->
+<!--        <div id="actual-card" class="w-[500px] h-[300px] bg-[#020617] p-8 relative overflow-hidden flex flex-col justify-between" style="border: 2px solid #06b6d4;">-->
+<!--            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 0); background-size: 20px 20px;"></div>-->
+<!--            <div class="flex justify-between items-start z-10">-->
+<!--                <div><h1 class="text-white font-black italic text-2xl tracking-tighter">FACESENSE AI</h1><p class="text-cyan-500 font-mono text-[8px] tracking-[0.4em]">AUTHENTICATED_BIOMETRIC_ID</p></div>-->
+<!--                <div class="w-12 h-12 border border-cyan-500/30 flex items-center justify-center text-[10px] text-cyan-500 font-bold">AI_ID</div>-->
+<!--            </div>-->
+<!--            <div class="z-10 flex gap-6 items-center">-->
+<!--                <div class="w-20 h-20 rounded-full border-2 border-dashed border-cyan-500 flex items-center justify-center"><span id="card-icon" class="text-3xl">👤</span></div>-->
+<!--                <div class="space-y-1"><p class="text-gray-500 text-[10px] uppercase font-bold">Subject ID</p><p id="card-username" class="text-white font-mono text-xl">NULL_NODE</p><div class="flex gap-2 mt-2"><span id="card-tag" class="px-2 py-0.5 bg-cyan-500 text-black text-[9px] font-bold rounded">TOP_EMO</span></div></div>-->
+<!--            </div>-->
+<!--            <div class="z-10 border-t border-white/10 pt-4 flex justify-between items-end">-->
+<!--                <div class="font-mono text-[8px] text-gray-600">HASH: <span id="card-hash">0x...</span><br>GEN: <span id="card-date">2025/12/28</span></div>-->
+<!--                <div class="text-cyan-500 font-bold text-[10px] italic">Verified by Neural Engine</div>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; 🚀 核心 JS 逻辑 &ndash;&gt;-->
+<!--<script>-->
+<!--        // -&#45;&#45; 全局变量 -&#45;&#45;-->
+<!--        let nocMap = null;-->
+<!--        let globalPie, userPie, userTrend;-->
+<!--        let serverStartTime = 0;-->
+<!--        let currentAnalysisUser = "";-->
+<!--        let currentAnalysisData = null;-->
+
+<!--        // ==========================================-->
+<!--        // 1. 语音播报-->
+<!--        // ==========================================-->
+<!--        function startVoiceBriefing() {-->
+<!--            const nodes = document.getElementById('stat-nodes').innerText;-->
+<!--            const load = document.getElementById('stat-load').innerText;-->
+<!--            const text = `系统报告。当前全站活跃节点 ${nodes} 个。CPU负载 ${load}。全量识别链路运行平稳。`;-->
+<!--            const speech = new SpeechSynthesisUtterance(text);-->
+<!--            speech.lang = 'zh-CN';-->
+<!--            speech.rate = 0.9;-->
+<!--            window.speechSynthesis.speak(speech);-->
+<!--            Swal.fire({ title: '🔊 播报中', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#020617', color: '#06b6d4' });-->
+<!--        }-->
+
+<!--        // ==========================================-->
+<!--        // 2. 地图更新 (强制生成虚拟飞线！！！)-->
+<!--        // ==========================================-->
+<!--        function updateMap(realNodes) {-->
+<!--            if (!nocMap) return;-->
+
+<!--            // -&#45;&#45; 🔴 核心修改：不管后端给什么，我都在前端生成假数据 -&#45;&#45;-->
+<!--            const visualNodes = [];-->
+<!--            // 每次生成 20 个随机点-->
+<!--            for (let i = 0; i < 20; i++) {-->
+<!--                visualNodes.push({-->
+<!--                    name: `VIRTUAL_${i}`,-->
+<!--                    value: [-->
+<!--                        (Math.random() * 320) - 160, // 随机经度 (-160 ~ 160)-->
+<!--                        (Math.random() * 120) - 60,  // 随机纬度 (-60 ~ 60)-->
+<!--                        Math.random() * 100          // 随机数值-->
+<!--                    ]-->
+<!--                });-->
+<!--            }-->
+
+<!--            const centerPoint = [116.40, 39.90]; // 终点：北京-->
+
+<!--            // 构造线条数据-->
+<!--            const linesData = visualNodes.map(node => {-->
+<!--                return {-->
+<!--                    coords: [-->
+<!--                        node.value.slice(0, 2), // 起点-->
+<!--                        centerPoint             // 终点-->
+<!--                    ]-->
+<!--                };-->
+<!--            });-->
+
+<!--            const option = {-->
+<!--                backgroundColor: 'transparent',-->
+<!--                geo: {-->
+<!--                    map: 'world',-->
+<!--                    roam: true,-->
+<!--                    label: { show: false },-->
+<!--                    itemStyle: {-->
+<!--                        areaColor: 'rgba(6, 182, 212, 0.05)',-->
+<!--                        borderColor: 'rgba(6, 182, 212, 0.3)'-->
+<!--                    },-->
+<!--                    emphasis: { itemStyle: { areaColor: 'rgba(6, 182, 212, 0.15)' } }-->
+<!--                },-->
+<!--                series: [-->
+<!--                    // 1. 散点 (波纹)-->
+<!--                    {-->
+<!--                        type: 'effectScatter',-->
+<!--                        coordinateSystem: 'geo',-->
+<!--                        data: visualNodes, // 用生成的假数据-->
+<!--                        symbolSize: 6,     // 稍微大一点-->
+<!--                        showEffectOn: 'render',-->
+<!--                        rippleEffect: { brushType: 'stroke', scale: 4, color: '#00ffff' },-->
+<!--                        itemStyle: { color: '#00ffff', shadowBlur: 10, shadowColor: '#00ffff' },-->
+<!--                        zlevel: 1-->
+<!--                    },-->
+<!--                    // 2. 飞线 (耀眼白光)-->
+<!--                    {-->
+<!--                        type: 'lines',-->
+<!--                        coordinateSystem: 'geo',-->
+<!--                        zlevel: 2,-->
+<!--                        effect: {-->
+<!--                            show: true,-->
+<!--                            period: 3,          // 3秒跑完，速度快一点-->
+<!--                            trailLength: 0.7,   // 尾巴拖很长-->
+<!--                            color: '#ffffff',   // 纯白最亮-->
+<!--                            symbol: 'arrow',-->
+<!--                            symbolSize: 8       // 箭头大一点-->
+<!--                        },-->
+<!--                        lineStyle: {-->
+<!--                            normal: {-->
+<!--                                color: '#a6c84c',-->
+<!--                                width: 0,       // 线条隐藏，只看光点-->
+<!--                                curveness: 0.2-->
+<!--                            }-->
+<!--                        },-->
+<!--                        data: linesData // 用生成的假线条-->
+<!--                    }-->
+<!--                ]-->
+<!--            };-->
+
+<!--            nocMap.setOption(option);-->
+<!--        }-->
+
+<!--        // ==========================================-->
+<!--        // 3. 自动日志-->
+<!--        // ==========================================-->
+<!--        function initAutoLogs() {-->
+<!--            const actions = ["PACKET_FILTER", "HANDSHAKE_ACK", "DB_INDEX_OPTIMIZE", "NODE_PING_SUCCESS"];-->
+<!--            const logBox = document.getElementById('admin-logs');-->
+<!--            setInterval(() => {-->
+<!--                if (!logBox) return;-->
+<!--                const randomAction = actions[Math.floor(Math.random() * actions.length)];-->
+<!--                const randomId = Math.floor(Math.random() * 9999).toString().padStart(4, '0');-->
+<!--                const timeStr = new Date().toLocaleTimeString('en-GB');-->
+<!--                const logRow = document.createElement('div');-->
+<!--                logRow.className = "text-[10px] font-mono text-cyan-500/70 truncate pl-2";-->
+<!--                logRow.innerHTML = `<span class="text-slate-600">[${timeStr}]</span> <span class="text-cyan-300">${randomAction}</span> :: PID:${randomId}`;-->
+<!--                logBox.prepend(logRow);-->
+<!--                if (logBox.children.length > 15) logBox.lastChild.remove();-->
+<!--            }, 800);-->
+<!--        }-->
+
+<!--        // ==========================================-->
+<!--        // 4. 后端数据同步-->
+<!--        // ==========================================-->
+<!--        async function fetchAdminData() {-->
+<!--            try {-->
+<!--                const res = await fetch('/api/admin/stats');-->
+<!--                const data = await res.json();-->
+
+<!--                // 只有数字用真的，地图全用假的-->
+<!--                document.getElementById('stat-load').innerText = data.system_load + "%";-->
+<!--                document.getElementById('load-bar').style.width = data.system_load + "%";-->
+<!--                document.getElementById('stat-nodes').innerText = data.active_nodes;-->
+<!--                document.getElementById('stat-intercepts').innerText = data.interceptions || 0;-->
+<!--                serverStartTime = data.start_time;-->
+
+<!--                // 更新地图 (不管后端给啥，updateMap里自己会生成)-->
+<!--                updateMap(data.geo_nodes);-->
+
+<!--                // 更新饼图-->
+<!--                const pieData = Object.keys(data.global_emotions).map(k => ({name: k, value: data.global_emotions[k]}));-->
+<!--                globalPie.setOption({-->
+<!--                    tooltip: { trigger: 'item' },-->
+<!--                    series: [{ type: 'pie', radius: ['40%', '70%'], data: pieData, itemStyle: {borderRadius: 8, borderColor: '#010409', borderWidth: 2}, label: {show: false} }]-->
+<!--                });-->
+
+<!--                // 更新表格-->
+<!--                const tbody = document.getElementById('user-table-body');-->
+<!--                tbody.innerHTML = "";-->
+<!--                data.user_data.forEach(u => {-->
+<!--                    tbody.innerHTML += `-->
+<!--                        <tr class="user-row transition border-b border-gray-800 hover:bg-white/5">-->
+<!--                            <td class="py-3 font-bold text-cyan-400 font-mono text-xs">${u.username}</td>-->
+<!--                            <td class="py-3 text-[10px] text-slate-500">${u.reg_time}</td>-->
+<!--                            <td class="py-3 font-mono text-xs text-white/70">${u.logins}</td>-->
+<!--                            <td class="py-3 space-x-2">-->
+<!--                                <button onclick="analyzeUser('${u.username}')" class="text-xs text-blue-400 underline">详情分析</button>-->
+<!--                                <button onclick="handleAction('${u.username}', 'delete')" class="text-xs text-red-1200 underline opacity-30 hover:opacity-100 transition">抹除</button>-->
+<!--                            </td>-->
+<!--                        </tr>`;-->
+<!--                });-->
+
+<!--            } catch (e) { console.error("Sync Error:", e); }-->
+<!--        }-->
+
+<!--        // ==========================================-->
+<!--        // 5. 系统启动-->
+<!--        // ==========================================-->
+<!--        async function initSystem() {-->
+<!--            try {-->
+<!--                globalPie = echarts.init(document.getElementById('global-pie-chart'));-->
+<!--                userPie = echarts.init(document.getElementById('user-pie-chart'));-->
+<!--                userTrend = echarts.init(document.getElementById('user-trend-chart'));-->
+
+<!--                const chartDom = document.getElementById('noc-map');-->
+<!--                if(chartDom) chartDom.innerHTML = '<div class="flex h-full items-center justify-center text-cyan-500 animate-pulse text-xs">LOADING GEO DATA...</div>';-->
+
+<!--                const mapRes = await fetch('/static/world.json');-->
+<!--                const mapJson = await mapRes.json();-->
+<!--                echarts.registerMap('world', mapJson);-->
+
+<!--                chartDom.innerHTML = '';-->
+<!--                if (nocMap) echarts.dispose(nocMap);-->
+<!--                nocMap = echarts.init(chartDom);-->
+
+<!--                // 初始化空地图-->
+<!--                nocMap.setOption({-->
+<!--                    backgroundColor: 'transparent',-->
+<!--                    geo: { map: 'world', roam: true, label: {show:false}, itemStyle: { areaColor: '#111', borderColor: '#333' } },-->
+<!--                    series: []-->
+<!--                });-->
+
+<!--                initAutoLogs();-->
+<!--                await fetchAdminData();-->
+<!--                setInterval(fetchAdminData, 5000); // 5秒刷新一次数据（飞线会自动刷新）-->
+
+<!--                window.addEventListener('resize', () => {-->
+<!--                    if (nocMap) nocMap.resize();-->
+<!--                    globalPie.resize();-->
+<!--                    userPie.resize();-->
+<!--                    userTrend.resize();-->
+<!--                });-->
+
+<!--            } catch (e) {-->
+<!--                console.error(e);-->
+<!--            }-->
+<!--        }-->
+
+<!--        // 辅助函数-->
+<!--        async function analyzeUser(username) {-->
+<!--            currentAnalysisUser = username;-->
+<!--            document.getElementById('analysisModal').classList.replace('hidden', 'flex');-->
+<!--            const res = await fetch(`/api/admin/user_analysis/${username}`);-->
+<!--            const data = await res.json();-->
+<!--            currentAnalysisData = data;-->
+<!--            userPie.setOption({ series: [{ type: 'pie', data: Object.keys(data.pie).map(k => ({name: k, value: data.pie[k]})), radius: ['35%', '65%'] }] });-->
+<!--            userTrend.setOption({ xAxis: { type: 'category', data: data.trend.map(t => t.time) }, yAxis: { type: 'category', data: ["平静", "喜悦", "惊讶", "忧伤", "愤怒", "恐惧", "厌恶"] }, series: [{ type: 'line', data: data.trend.map(t => t.emo), smooth: true }] });-->
+<!--            setTimeout(() => { userPie.resize(); userTrend.resize(); }, 150);-->
+<!--        }-->
+
+<!--        async function generateDigitalID() {-->
+<!--             const canvas = await html2canvas(document.getElementById('actual-card'), { backgroundColor: null, scale: 3 });-->
+<!--             const link = document.createElement('a'); link.download = 'ID.png'; link.href = canvas.toDataURL(); link.click();-->
+<!--        }-->
+
+<!--        function closeModal() { document.getElementById('analysisModal').classList.replace('flex', 'hidden'); }-->
+<!--        function adminLogout() { window.location.href = '/'; }-->
+
+<!--        setInterval(() => {-->
+<!--            if(serverStartTime === 0) return;-->
+<!--            let d = Math.floor(Date.now()/1000 - serverStartTime);-->
+<!--            document.getElementById('uptime-clock').innerText = new Date(d * 1000).toISOString().substr(11, 8);-->
+<!--        }, 1000);-->
+
+<!--        // 启动-->
+<!--        initSystem();-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+
+
+
+
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>FaceSense AI // 系统指挥中心</title>
+    <!-- 1. 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- 2. 引入 ECharts 核心 -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- 3. 引入工具库 (SweetAlert2 用于弹窗, html2canvas 用于截图) -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;700&display=swap');
+        body { background: #010409; color: #c9d1d9; font-family: 'Segoe UI', 'JetBrains Mono', sans-serif; overflow: hidden; height: 100vh; }
+        .glass { background: rgba(13, 17, 23, 0.85); border: 1px solid rgba(56, 189, 248, 0.1); backdrop-filter: blur(20px); }
+        .no-scrollbar::-webkit-scrollbar { width: 4px; }
+        .no-scrollbar::-webkit-scrollbar-thumb { background: rgba(6, 182, 212, 0.2); border-radius: 10px; }
+
+        /* 表格样式 */
+        .cyber-table th { color: #57606a; font-size: 10px; uppercase; letter-spacing: 0.1em; padding: 12px; border-bottom: 1px solid #21262d; }
+        .cyber-table td { padding: 12px; font-size: 13px; border-bottom: 1px solid #21262d; }
+        .user-row:hover { background: rgba(56, 189, 248, 0.05); }
+    </style>
+</head>
+<body class="p-4 flex flex-col gap-4">
+
+    <!-- 顶栏 -->
+    <header class="glass p-4 rounded-2xl flex justify-between items-center border-b-2 border-cyan-500/30">
+        <div class="flex items-center gap-6">
+            <div class="flex items-center gap-2">
+                <div class="w-3 h-3 bg-cyan-500 rounded-full animate-pulse shadow-[0_0_15px_#06b6d4]"></div>
+                <h1 class="text-xl font-black tracking-widest italic text-white uppercase">Admin_Matrix // 系统总控</h1>
+            </div>
+            <div class="text-[10px] text-slate-500 uppercase tracking-[0.2em]">运行时间: <span id="uptime-clock" class="text-cyan-400 font-bold">00:00:00</span></div>
+        </div>
+        <!-- 新增这个按钮 -->
+        <a href="/profiler" class="text-cyan-400 hover:text-purple-300 py-2 border-b-2 border-transparent hover:border-purple-500 transition">
+            <i class="fa-solid fa-fingerprint mr-1"></i> 分析用户心理画像
+        </a>
+        <div class="flex items-center gap-6">
+            <button onclick="startVoiceBriefing()" class="text-[10px] bg-cyan-500/10 border border-cyan-500/30 px-3 py-1 rounded-full text-cyan-400 hover:bg-cyan-500/20 transition">🔊 AI 语音简报</button>
+            <button onclick="adminLogout()" class="bg-red-900/20 text-red-500 px-6 py-1.5 rounded-xl border border-red-900/30 font-bold text-xs uppercase hover:bg-red-500 hover:text-white transition">退出授权</button>
+        </div>
+    </header>
+
+    <!-- 主布局 -->
+    <div class="grid grid-cols-12 gap-4 flex-1 min-h-0">
+
+        <!-- 左侧：地图 -->
+        <div class="col-span-3 flex flex-col gap-4 min-h-0">
+            <div class="glass rounded-[2rem] p-4 h-[60%] flex flex-col relative overflow-hidden">
+                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Global_Node_Map // 全球节点</h3>
+                <div id="noc-map" class="flex-1 w-full"></div>
+            </div>
+            <div class="glass rounded-[2rem] p-5 h-[40%] flex flex-col overflow-hidden">
+                <h3 class="text-[10px] text-slate-500 mb-4 font-bold tracking-widest uppercase">Live_Audit_Logs // 实时审计</h3>
+                <div id="admin-logs" class="flex-1 overflow-y-auto space-y-2 text-[9px] font-mono text-cyan-500/60 no-scrollbar"></div>
+            </div>
+        </div>
+
+        <!-- 中间：表格 -->
+        <div class="col-span-6 glass rounded-[2.5rem] p-8 flex flex-col min-h-0 relative">
+            <div class="flex justify-between items-center mb-8">
+                <h2 class="text-xl font-bold text-white flex items-center gap-3">
+                    <span class="w-1.5 h-6 bg-cyan-500 rounded-full"></span> 数据库权限矩阵
+                </h2>
+                <!-- 导出 CSV 按钮 -->
+                <button onclick="exportReport()" class="text-[10px] text-cyan-500 border border-cyan-500/20 px-4 py-2 rounded-full hover:bg-cyan-500/10 transition flex items-center gap-2">
+                    <span>⬇️</span> 导出全站报表 (.CSV)
+                </button>
+            </div>
+            <div class="flex-1 overflow-y-auto pr-2 no-scrollbar">
+                <table class="w-full text-left cyber-table">
+                    <thead><tr><th>用户标识</th><th>注册日期</th><th>访问频次</th><th>操作矩阵</th></tr></thead>
+                    <tbody id="user-table-body"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 右侧：图表 -->
+        <div class="col-span-3 flex flex-col gap-4 min-h-0">
+            <div class="glass rounded-[2rem] p-6 h-[45%] flex flex-col">
+                <h3 class="text-[10px] text-slate-500 mb-6 font-bold tracking-widest uppercase text-center">全站情绪倾向分布</h3>
+                <div id="global-pie-chart" class="flex-1"></div>
+            </div>
+            <div class="glass rounded-[2rem] p-6 h-[30%] flex flex-col gap-4">
+                <h3 class="text-[10px] text-slate-500 font-bold tracking-widest uppercase">Health // 健康指标</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between text-[10px] mb-2 text-slate-400"><span>CPU_LOAD</span><span id="stat-load">0%</span></div>
+                        <div class="h-1 bg-white/5 rounded-full overflow-hidden"><div id="load-bar" class="h-full bg-cyan-500 transition-all duration-1000" style="width: 0%"></div></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">异常拦截</p><p id="stat-intercepts" class="text-lg font-bold text-red-500 font-mono">0</p></div>
+                        <div class="bg-white/5 p-3 rounded-xl border border-white/5"><p class="text-[9px] text-gray-500">活跃节点</p><p id="stat-nodes" class="text-lg font-bold text-green-500 font-mono">0</p></div>
+                    </div>
+                </div>
+            </div>
+            <div class="bg-cyan-500/10 rounded-[2rem] border border-cyan-500/20 p-6 h-[25%] flex flex-col justify-center text-center">
+                <h4 class="text-cyan-400 font-bold text-xs mb-2">AI_COMMAND_BOT</h4>
+                <p id="ai-status" class="text-[10px] text-cyan-200/50 leading-relaxed italic">"系统正在全量扫描识别链路，当前无异常波动..."</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- 用户详情 Modal -->
+    <div id="analysisModal" class="fixed inset-0 bg-black/95 hidden z-[1000] items-center justify-center p-8 backdrop-blur-md">
+        <div class="glass p-10 rounded-[3rem] w-full max-w-6xl relative border border-cyan-500/30 shadow-2xl">
+            <button onclick="closeModal()" class="absolute top-8 right-8 text-2xl text-gray-500 hover:text-white transition">×</button>
+            <h2 id="modalUserTitle" class="text-2xl font-bold mb-10 italic text-cyan-400 uppercase tracking-tighter">User_Bio_Audit // 用户深度审计</h2>
+            <div class="grid grid-cols-2 gap-10">
+                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col"><h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">情感分布比例矩阵</h3><div id="user-pie-chart" class="w-full h-full"></div></div>
+                <div class="bg-black/40 p-6 rounded-3xl h-[450px] border border-white/5 flex flex-col"><h3 class="text-xs text-center text-gray-500 mb-6 uppercase tracking-widest">近期情绪演变时间轴</h3><div id="user-trend-chart" class="w-full h-full"></div></div>
+            </div>
+            <!-- 数字身份 DNA 区域 -->
+            <div class="mt-8 flex justify-between items-center p-6 bg-cyan-600/5 rounded-2xl border border-cyan-500/20">
+                <div><h4 class="text-white font-bold tracking-widest text-sm">DIGITAL_DNA // 数字身份凭证</h4><p class="text-[10px] text-gray-500 uppercase tracking-widest mt-1">根据情感权重向量生成唯一视觉指纹</p></div>
+                <button onclick="generateDigitalID()" class="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded-xl text-xs transition shadow-lg shadow-cyan-900/40 uppercase">生成并导出 PNG</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的名片渲染模版 (用于生成图片) -->
+    <div id="id-card-template" style="position: fixed; left: -9999px;">
+        <div id="actual-card" class="w-[500px] h-[300px] bg-[#020617] p-8 relative overflow-hidden flex flex-col justify-between" style="border: 2px solid #06b6d4;">
+            <div class="absolute inset-0 opacity-10" style="background-image: radial-gradient(#06b6d4 1px, transparent 0); background-size: 20px 20px;"></div>
+            <div class="flex justify-between items-start z-10">
+                <div><h1 class="text-white font-black italic text-2xl tracking-tighter">FACESENSE AI</h1><p class="text-cyan-500 font-mono text-[8px] tracking-[0.4em]">AUTHENTICATED_BIOMETRIC_ID</p></div>
+                <div class="w-12 h-12 border border-cyan-500/30 flex items-center justify-center text-[10px] text-cyan-500 font-bold">AI_ID</div>
+            </div>
+            <div class="z-10 flex gap-6 items-center">
+                <div class="w-20 h-20 rounded-full border-2 border-dashed border-cyan-500 flex items-center justify-center"><span id="card-icon" class="text-3xl">👤</span></div>
+                <div class="space-y-1"><p class="text-gray-500 text-[10px] uppercase font-bold">Subject ID</p><p id="card-username" class="text-white font-mono text-xl">NULL_NODE</p><div class="flex gap-2 mt-2"><span id="card-tag" class="px-2 py-0.5 bg-cyan-500 text-black text-[9px] font-bold rounded">TOP_EMO</span></div></div>
+            </div>
+            <div class="z-10 border-t border-white/10 pt-4 flex justify-between items-end">
+                <div class="font-mono text-[8px] text-gray-600">HASH: <span id="card-hash">0x...</span><br>GEN: <span id="card-date">2025/12/28</span></div>
+                <div class="text-cyan-500 font-bold text-[10px] italic">Verified by Neural Engine</div>
+            </div>
+            <div class="absolute right-0 top-0 h-full w-1 bg-cyan-500 shadow-[0_0_15px_#06b6d4]"></div>
+        </div>
+    </div>
+
+    <script>
+        // --- 全局变量 ---
+        let nocMap = null;
+        let globalPie, userPie, userTrend;
+        let serverStartTime = 0;
+        let currentAnalysisUser = "";
+        let currentAnalysisData = null;
+        let globalUserData = []; // 用于导出 CSV
+
+        // ==========================================
+        // 1. 功能：CSV 导出
+        // ==========================================
+        function exportReport() {
+            if (!globalUserData || globalUserData.length === 0) {
+                Swal.fire({ icon: 'warning', title: '无数据', text: '暂无用户数据可导出', background: '#020617', color: '#fff' });
+                return;
+            }
+
+            // 构造 CSV 内容
+            let csvContent = "data:text/csv;charset=utf-8,\uFEFF"; // BOM头防乱码
+            csvContent += "用户名,注册时间,登录次数,角色\n"; // 表头
+
+            globalUserData.forEach(u => {
+                csvContent += `${u.username},${u.reg_time},${u.logins},${u.role}\n`;
+            });
+
+            // 触发下载
+            const encodedUri = encodeURI(csvContent);
+            const link = document.createElement("a");
+            link.setAttribute("href", encodedUri);
+            link.setAttribute("download", `FaceSense_Report_${new Date().toLocaleDateString()}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            Swal.fire({ icon: 'success', title: '导出成功', text: '报表已下载到本地', background: '#020617', color: '#fff' });
+        }
+
+        // ==========================================
+        // 2. 功能：数字身份生成 (Digital DNA)
+        // ==========================================
+        async function generateDigitalID() {
+            if(!currentAnalysisData) return;
+
+            // 1. 计算主导情绪
+            const pieRaw = currentAnalysisData.pie;
+            let topEmo = "平静"; let maxV = -1;
+            for(let k in pieRaw) { if(pieRaw[k] > maxV) { maxV = pieRaw[k]; topEmo = k; } }
+
+            // 2. 填充隐藏的 HTML 模版
+            document.getElementById('card-username').innerText = currentAnalysisUser.toUpperCase();
+            document.getElementById('card-tag').innerText = `主导特征: ${topEmo}`;
+            document.getElementById('card-date').innerText = new Date().toLocaleDateString();
+            document.getElementById('card-hash').innerText = '0x' + Math.random().toString(16).substr(2, 10).toUpperCase();
+            const icons = {"喜悦":"😊","忧伤":"😢","愤怒":"😠","平静":"😐","惊讶":"😲","恐惧":"😨","厌恶":"🤢"};
+            document.getElementById('card-icon').innerText = icons[topEmo] || "👤";
+
+            // 3. 截图并下载
+            try {
+                const canvas = await html2canvas(document.getElementById('actual-card'), {
+                    backgroundColor: null,
+                    scale: 3, // 高清
+                    useCORS: true
+                });
+                const link = document.createElement('a');
+                link.download = `DNA_ID_${currentAnalysisUser}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                Swal.fire({ icon: 'success', title: '数字画像已导出', background: '#020617', color: '#fff' });
+            } catch (e) {
+                console.error(e);
+                Swal.fire({ icon: 'error', title: '生成失败', text: e.message, background: '#020617', color: '#fff' });
+            }
+        }
+
+        // ==========================================
+        // 3. 功能：用户操作 (抹除 & 重置密码)
+        // ==========================================
+        async function handleAction(username, actionType) {
+            const titleMap = { 'delete': '确认抹除?', 'reset': '重置密码?' };
+            const textMap = { 'delete': '此操作不可逆！用户所有数据将被销毁。', 'reset': '密码将被重置为默认值: 123456' };
+            const confirmColor = actionType === 'delete' ? '#ef4444' : '#f59e0b';
+
+            const result = await Swal.fire({
+                title: titleMap[actionType],
+                text: textMap[actionType],
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: confirmColor,
+                cancelButtonColor: '#3085d6',
+                confirmButtonText: '立即执行',
+                background: '#020617',
+                color: '#fff'
+            });
+
+            if (result.isConfirmed) {
+                try {
+                    // 构建表单数据
+                    const formData = new FormData();
+                    formData.append('username', username);
+                    formData.append('action', actionType);
+
+                    const res = await fetch('/api/admin/user_action', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const data = await res.json();
+
+                    if (data.status === 'success') {
+                        Swal.fire({ icon: 'success', title: '执行成功', text: data.message, background: '#020617', color: '#fff' });
+                        // 刷新数据
+                        fetchAdminData();
+                    } else {
+                        throw new Error(data.message);
+                    }
+                } catch (e) {
+                    Swal.fire({ icon: 'error', title: '执行失败', text: e.message, background: '#020617', color: '#fff' });
+                }
+            }
+        }
+
+        // ==========================================
+        // 4. 地图逻辑 (保留随机飞线)
+        // ==========================================
+        function updateMap(realNodes) {
+            if (!nocMap) return;
+
+            // 生成随机虚拟节点
+            const visualNodes = [];
+            for (let i = 0; i < 20; i++) {
+                visualNodes.push({
+                    name: `VIRTUAL_${i}`,
+                    value: [(Math.random() * 320) - 160, (Math.random() * 120) - 60, Math.random() * 100]
+                });
+            }
+            const centerPoint = [116.40, 39.90];
+            const linesData = visualNodes.map(node => ({ coords: [node.value.slice(0, 2), centerPoint] }));
+
+            const option = {
+                backgroundColor: 'transparent',
+                geo: {
+                    map: 'world', roam: true, label: { show: false },
+                    itemStyle: { areaColor: 'rgba(6, 182, 212, 0.05)', borderColor: 'rgba(6, 182, 212, 0.3)' },
+                    emphasis: { itemStyle: { areaColor: 'rgba(6, 182, 212, 0.15)' } }
+                },
+                series: [
+                    { type: 'effectScatter', coordinateSystem: 'geo', data: visualNodes, symbolSize: 6, showEffectOn: 'render', rippleEffect: { brushType: 'stroke', scale: 4, color: '#00ffff' }, itemStyle: { color: '#00ffff', shadowBlur: 10, shadowColor: '#00ffff' }, zlevel: 1 },
+                    { type: 'lines', coordinateSystem: 'geo', zlevel: 2, effect: { show: true, period: 3, trailLength: 0.7, color: '#ffffff', symbol: 'arrow', symbolSize: 8 }, lineStyle: { normal: { color: '#a6c84c', width: 0, curveness: 0.2 } }, data: linesData }
+                ]
+            };
+            nocMap.setOption(option);
+        }
+
+        // ==========================================
+        // 5. 数据同步
+        // ==========================================
+        async function fetchAdminData() {
+            try {
+                const res = await fetch('/api/admin/stats');
+                const data = await res.json();
+
+                // 更新全局变量 (给 CSV 导出用)
+                globalUserData = data.user_data;
+
+                // 更新 UI
+                document.getElementById('stat-load').innerText = data.system_load + "%";
+                document.getElementById('load-bar').style.width = data.system_load + "%";
+                document.getElementById('stat-nodes').innerText = data.active_nodes;
+                document.getElementById('stat-intercepts').innerText = data.interceptions || 0;
+                serverStartTime = data.start_time;
+
+                updateMap(data.geo_nodes);
+
+                const pieData = Object.keys(data.global_emotions).map(k => ({name: k, value: data.global_emotions[k]}));
+                globalPie.setOption({ tooltip: { trigger: 'item' }, series: [{ type: 'pie', radius: ['40%', '70%'], data: pieData, itemStyle: {borderRadius: 8, borderColor: '#010409', borderWidth: 2}, label: {show: false} }] });
+
+                // 更新用户表格 (带操作按钮)
+                const tbody = document.getElementById('user-table-body');
+                tbody.innerHTML = "";
+                data.user_data.forEach(u => {
+                    tbody.innerHTML += `
+                        <tr class="user-row transition border-b border-gray-800 hover:bg-white/5">
+                            <td class="py-3 font-bold text-cyan-400 font-mono text-xs">${u.username}</td>
+                            <td class="py-3 text-[10px] text-slate-500">${u.reg_time}</td>
+                            <td class="py-3 font-mono text-xs text-white/70">${u.logins}</td>
+                            <td class="py-3 space-x-2">
+                                <button onclick="analyzeUser('${u.username}')" class="text-[10px] bg-blue-500/20 text-blue-400 px-2 py-1 rounded hover:bg-blue-500/40">分析</button>
+                                <button onclick="handleAction('${u.username}', 'reset')" class="text-[10px] bg-yellow-500/20 text-yellow-400 px-2 py-1 rounded hover:bg-yellow-500/40">重置</button>
+                                <button onclick="handleAction('${u.username}', 'delete')" class="text-[10px] bg-red-500/20 text-red-500 px-2 py-1 rounded hover:bg-red-500/40">抹除</button>
+                            </td>
+                        </tr>`;
+                });
+
+            } catch (e) { console.error("Sync Error:", e); }
+        }
+
+        // ==========================================
+        // 6. 系统启动
+        // ==========================================
+        function initAutoLogs() {
+            const actions = ["PACKET_FILTER", "HANDSHAKE_ACK", "DB_INDEX_OPTIMIZE", "NODE_PING_SUCCESS"];
+            const logBox = document.getElementById('admin-logs');
+            setInterval(() => {
+                if (!logBox) return;
+                const randomAction = actions[Math.floor(Math.random() * actions.length)];
+                const randomId = Math.floor(Math.random() * 9999).toString().padStart(4, '0');
+                const timeStr = new Date().toLocaleTimeString('en-GB');
+                const logRow = document.createElement('div');
+                logRow.className = "text-[10px] font-mono text-cyan-500/70 truncate pl-2";
+                logRow.innerHTML = `<span class="text-slate-600">[${timeStr}]</span> <span class="text-cyan-300">${randomAction}</span> :: PID:${randomId}`;
+                logBox.prepend(logRow);
+                if (logBox.children.length > 15) logBox.lastChild.remove();
+            }, 800);
+        }
+
+        async function initSystem() {
+            try {
+                globalPie = echarts.init(document.getElementById('global-pie-chart'));
+                userPie = echarts.init(document.getElementById('user-pie-chart'));
+                userTrend = echarts.init(document.getElementById('user-trend-chart'));
+
+                const chartDom = document.getElementById('noc-map');
+                if(chartDom) chartDom.innerHTML = '<div class="flex h-full items-center justify-center text-cyan-500 animate-pulse text-xs">LOADING GEO DATA...</div>';
+
+                const mapRes = await fetch('/static/world.json');
+                const mapJson = await mapRes.json();
+                echarts.registerMap('world', mapJson);
+
+                chartDom.innerHTML = '';
+                if (nocMap) echarts.dispose(nocMap);
+                nocMap = echarts.init(chartDom);
+                nocMap.setOption({ backgroundColor: 'transparent', geo: { map: 'world', roam: true, label: {show:false}, itemStyle: { areaColor: '#111', borderColor: '#333' } }, series: [] });
+
+                initAutoLogs();
+                await fetchAdminData();
+                setInterval(fetchAdminData, 5000);
+
+                window.addEventListener('resize', () => { if(nocMap) nocMap.resize(); globalPie.resize(); userPie.resize(); userTrend.resize(); });
+            } catch (e) { console.error(e); }
+        }
+
+        // 辅助函数
+        async function analyzeUser(username) {
+            currentAnalysisUser = username;
+            document.getElementById('analysisModal').classList.replace('hidden', 'flex');
+            const res = await fetch(`/api/admin/user_analysis/${username}`);
+            const data = await res.json();
+            currentAnalysisData = data;
+            userPie.setOption({ series: [{ type: 'pie', data: Object.keys(data.pie).map(k => ({name: k, value: data.pie[k]})), radius: ['35%', '65%'] }] });
+            userTrend.setOption({ xAxis: { type: 'category', data: data.trend.map(t => t.time) }, yAxis: { type: 'category', data: ["平静", "喜悦", "惊讶", "忧伤", "愤怒", "恐惧", "厌恶"] }, series: [{ type: 'line', data: data.trend.map(t => t.emo), smooth: true }] });
+            setTimeout(() => { userPie.resize(); userTrend.resize(); }, 150);
+        }
+
+        function closeModal() { document.getElementById('analysisModal').classList.replace('flex', 'hidden'); }
+        function startVoiceBriefing() {
+            const nodes = document.getElementById('stat-nodes').innerText;
+            const load = document.getElementById('stat-load').innerText;
+            const text = `系统报告。当前全站活跃节点 ${nodes} 个。CPU负载 ${load}。全量识别链路运行平稳。`;
+            const speech = new SpeechSynthesisUtterance(text);
+            speech.lang = 'zh-CN'; speech.rate = 0.9;
+            window.speechSynthesis.speak(speech);
+            Swal.fire({ title: '🔊 播报中', toast: true, position: 'top-end', showConfirmButton: false, timer: 3000, background: '#020617', color: '#06b6d4' });
+        }
+        // ==========================================
+        // 退出登录 (带确认弹窗)
+        // ==========================================
+        function adminLogout() {
+            Swal.fire({
+                title: '终止授权会话?',
+                text: "系统将断开与神经网络的连接并清除本地缓存。",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',     // 确认按钮红色
+                cancelButtonColor: '#3085d6',   // 取消按钮蓝色
+                confirmButtonText: '立即退出',
+                cancelButtonText: '保持连接',
+                // 下面两行是为了配合你的黑色主题
+                background: '#020617',
+                color: '#fff'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // 用户点击了“立即退出”，执行跳转
+                    window.location.href = '/';
+                }
+            });
+        }
+
+        setInterval(() => {
+            if(serverStartTime === 0) return;
+            let d = Math.floor(Date.now()/1000 - serverStartTime);
+            document.getElementById('uptime-clock').innerText = new Date(d * 1000).toISOString().substr(11, 8);
+        }, 1000);
+
+        initSystem();
+    </script>
+</body>
+</html>
