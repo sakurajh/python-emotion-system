@@ -19,8 +19,8 @@ import re # <--- 必须加这个！
 from openai import AsyncOpenAI  # <--- 改成这个
 # --- AI 助手配置 ---
 # 替换为你的真实 API Key 和推理接入点 ID
-ARK_API_KEY = "***REDACTED-ARK-KEY***"
-ARK_ENDPOINT_ID = "doubao-seed-code-preview-251028"
+ARK_API_KEY = os.environ.get("ARK_API_KEY", "")
+ARK_ENDPOINT_ID = os.environ.get("ARK_ENDPOINT_ID", "")
 
 client = AsyncOpenAI(
     base_url="https://ark.cn-beijing.volces.com/api/v3",
@@ -38,10 +38,10 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 # ==========================================
 # 2. 公网 MySQL 数据库配置
 # ==========================================
-DB_USER = "sakurajh1"
-DB_PASS = "***REDACTED-DB-PASSWORD***"
-DB_HOST = "mysql6.sqlpub.com"
-DB_PORT = "3311"
+DB_USER = os.environ.get("DB_USER", "")
+DB_PASS = os.environ.get("DB_PASS", "")
+DB_HOST = os.environ.get("DB_HOST", "localhost")
+DB_PORT = os.environ.get("DB_PORT", "3306")
 DB_NAME = "facesense_db"
 
 DATABASE_URL = f"mysql+pymysql://{DB_USER}:{DB_PASS}@{DB_HOST}:{DB_PORT}/{DB_NAME}?charset=utf8mb4"
