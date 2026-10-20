@@ -13,12 +13,16 @@ import fitz # PyMuPDF
 from rapidocr_onnxruntime import RapidOCR # 强大的 OCR 识别
 from docx import Document
 import re # <--- 必须加这个！
+from dotenv import load_dotenv
+
+# 从项目根目录的 .env 读取敏感配置（.env 已被 .gitignore 忽略，不会进仓库）
+load_dotenv()
 
 
 # from openai import OpenAI
 from openai import AsyncOpenAI  # <--- 改成这个
 # --- AI 助手配置 ---
-# 替换为你的真实 API Key 和推理接入点 ID
+# 从环境变量 / .env 读取，切勿再写死在代码里（见 .env.example）
 ARK_API_KEY = os.environ.get("ARK_API_KEY", "")
 ARK_ENDPOINT_ID = os.environ.get("ARK_ENDPOINT_ID", "")
 

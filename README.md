@@ -92,7 +92,15 @@ export ARK_ENDPOINT_ID=你的接入点ID
 export DB_USER=root DB_PASS=你的密码
 ```
 
-> 参考 [.env.example](.env.example)（仅作说明用途，代码直接读取系统环境变量）。
+**推荐：使用 `.env` 文件（自动加载）**
+
+```bash
+cp .env.example .env      # Windows: copy .env.example .env
+# 然后编辑 .env，填入自己的 Key 与密码
+```
+
+> `.env` 已在 `.gitignore` 中，**不会**被提交；`main.py` 启动时通过 `python-dotenv` 自动加载。
+> 也可以继续用上面 CMD / export 的方式设置系统环境变量，两者等效。
 
 ### 3. 启动
 
@@ -110,7 +118,8 @@ python-emotion-system/
 ├── requirements.txt    # 依赖清单
 ├── templates/          # Jinja2 页面模板
 ├── static/             # 前端静态资源（CSS / JS / 图表）
-└── .env.example        # 环境变量示例（不含真实密钥）
+├── .env.example        # 环境变量示例（不含真实密钥）
+└── .gitignore          # 忽略 .env 等敏感文件
 ```
 
 ## 🔌 API 一览（节选）
@@ -126,7 +135,8 @@ python-emotion-system/
 
 ## ⚠️ 安全提示
 
-- 项目曾因早期版本在代码中硬编码密钥而存在泄露风险，**已改为环境变量读取**；如你部署了旧版本，请务必在控制台**更换 API Key 与数据库密码**
+- 项目曾因早期版本在代码中硬编码密钥而存在泄露风险，**已改为环境变量 / `.env` 读取，并已从 Git 历史中彻底清除**
+- 旧版本曾公开过的 API Key 与数据库密码**必须视为已泄露**，请到火山方舟控制台重置 Key、并修改 MySQL 密码
 - 生产部署建议加 HTTPS、限制上传文件类型与大小、给管理接口加权限校验
 
 ## 📄 License
